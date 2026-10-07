@@ -2040,6 +2040,71 @@ const SCORES = [
    return {lvl:d[0], head:`ASA ${["","I","II","III","IV","V","VI"][n]}`,
     body:`${d[1]}<br><b>Ký hiệu E:</b> thêm chữ E vào sau mức I–V khi là mổ cấp cứu, tức là trì hoãn sẽ làm tăng đáng kể nguy cơ mất mạng hoặc mất chi. ASA VI không bao giờ kèm E.`};
   }
+ },
+ {
+  id:"geneva", name:"Geneva cải tiến — xác suất PE", short:"Xác suất lâm sàng thuyên tắc phổi trước chẩn đoán hình ảnh",
+  src:"Le Gal 2006; ESC/ERS 2019 — DOI 10.1093/eurheartj/ehz405",
+  items:[
+   {k:"age",    t:"Tuổi trên 65", type:"yn", p:1, auto:()=> P.ageY>0 ? (P.ageY>65?1:0) : null},
+   {k:"prev",   t:"Tiền sử DVT hoặc PE", type:"yn", p:3},
+   {k:"surg",   t:"Phẫu thuật (gây mê toàn thân) hoặc gãy xương chi dưới trong 1 tháng", type:"yn", p:2},
+   {k:"cancer", t:"Ung thư ác tính đang hoạt động", h:"Đang điều trị hoặc trong vòng 1 năm", type:"yn", p:2},
+   {k:"pain",   t:"Đau chi dưới một bên", type:"yn", p:3},
+   {k:"hemo",   t:"Ho ra máu", type:"yn", p:2},
+   {k:"hr",     t:"Nhịp tim", type:"opt", o:[["< 75",0],["75–94",3],["≥ 95",5]]},
+   {k:"palp",   t:"Đau khi ấn dọc tĩnh mạch sâu chi dưới VÀ phù một bên", type:"yn", p:4}
+  ],
+  result(n){
+   const aadd = P.ageY>50 ? `<b>${Math.round(P.ageY*10)} µg/L</b> (tuổi × 10)` : `<b>500 µg/L</b>`;
+   let lvl, cat, dd;
+   if(n<=3){ lvl="ok"; cat="Xác suất THẤP (0–3 điểm)";
+     dd=`Làm <b>D-dimer</b>. Theo kiểu bậc thang (PEGeD), nhóm xác suất thấp dùng ngưỡng <b>&lt; 1000 µg/L</b>; hoặc ngưỡng hiệu chỉnh theo tuổi ${aadd}. Dưới ngưỡng → <b>loại trừ PE</b>, không cần chụp.`; }
+   else if(n<=10){ lvl="warn"; cat="Xác suất TRUNG BÌNH (4–10 điểm)";
+     dd=`Làm <b>D-dimer</b>, ngưỡng <b>&lt; 500 µg/L</b> (hoặc hiệu chỉnh theo tuổi ${aadd}). Dưới ngưỡng → loại trừ PE. Trên ngưỡng → <b>CTPA</b>.`; }
+   else { lvl="danger"; cat="Xác suất CAO (≥ 11 điểm)";
+     dd=`<b>Không làm D-dimer.</b> Chuyển thẳng <b>CTPA</b>, và khởi động kháng đông ngay trong lúc chờ nếu chưa chống chỉ định.`; }
+   return {lvl, head:`${n} điểm — ${cat}`,
+    body:`${dd}<br><br>
+      <b>Khởi động kháng đông sớm</b> khi xác suất cao hoặc trung bình mà chưa loại trừ được, trừ khi nguy cơ chảy máu cao (ESC Class I).<br>
+      → Nếu CTPA xác định PE: sang thẻ <b>“sPESI &amp; xử trí PE”</b> ngay bên dưới để phân tầng và chọn thuốc.<br>
+      <i>Lưu ý: ngưỡng bậc thang 1000 µg/L (PEGeD) được kiểm định chủ yếu với thang Wells; áp cho nhóm Geneva xác suất thấp là suy luận tương đương, chưa kiểm định riêng. Ngưỡng hiệu chỉnh tuổi áp dụng cho nhóm không-cao trên 50 tuổi.</i>`};
+  }
+ },
+ {
+  id:"pemgmt", name:"sPESI & xử trí PE đã xác định", short:"Phân tầng nguy cơ tử vong sớm và điều trị PE cấp",
+  src:"ESC/ERS 2019 — DOI 10.1093/eurheartj/ehz405; sPESI: Jiménez 2010",
+  items:[
+   {k:"age80",  t:"Tuổi trên 80", type:"yn", p:1, auto:()=> P.ageY>0 ? (P.ageY>80?1:0) : null},
+   {k:"cancer", t:"Ung thư (đang hoạt động hoặc tiền sử)", type:"yn", p:1},
+   {k:"cardio", t:"Suy tim mạn hoặc bệnh phổi mạn", type:"yn", p:1},
+   {k:"hr110",  t:"Mạch ≥ 110 lần/phút", type:"yn", p:1},
+   {k:"sbp",    t:"Huyết áp tâm thu < 100 mmHg", type:"yn", p:1},
+   {k:"spo2",   t:"SpO₂ < 90 %", type:"yn", p:1}
+  ],
+  result(n){
+   const lvl = n===0 ? "ok" : "warn";
+   const enox  = P.wt>0 ? `${r(P.wt,0)} mg` : "— nhập cân nặng";
+   const enox15= P.wt>0 ? `${sig(1.5*P.wt)} mg` : "—";
+   const bolus = P.wt>0 ? `${Math.round(80*P.wt)} UI` : "—";
+   const ufh   = P.wt>0 ? `${Math.round(18*P.wt)} UI/giờ` : "—";
+   const tier = n===0
+     ? `<b>sPESI = 0 → nguy cơ THẤP</b> nếu siêu âm tim không có rối loạn chức năng thất phải. Cân nhắc kháng đông ngoại trú hoặc xuất viện sớm (ESC IIa).`
+     : `<b>sPESI ≥ 1 → nguy cơ TRUNG BÌNH.</b> Thêm <b>chức năng thất phải</b> (siêu âm hoặc CT) và <b>troponin</b> để chia nhỏ: cả hai bất thường → <b>trung bình–cao</b> (nhập viện, theo dõi sát, chuẩn bị tái tưới máu cứu vãn); chỉ một hoặc không có → <b>trung bình–thấp</b>.`;
+   return {lvl, head:`sPESI ${n} điểm`,
+    body:`<b style="color:var(--danger)">BƯỚC 1 — Loại nguy cơ CAO trước:</b> nếu <b>sốc hoặc tụt huyết áp kéo dài</b> (HATT &lt; 90 mmHg hoặc tụt ≥ 40 mmHg trên 15 phút, hoặc cần vận mạch để giữ HA) → <b>NGUY CƠ CAO</b>, bất kể điểm sPESI.<br>
+      • Hỗ trợ huyết động: <b>Norepinephrine</b> 0,05–0,5 µg/kg/phút (đầu tay) ± <b>Dobutamine</b> 2–10 µg/kg/phút. <a href="#" onclick="goInfusion();return false" style="color:var(--accent);font-weight:600">→ Mở bảng pha truyền ở tab Cấp cứu</a> để tính tốc độ mL/giờ.<br>
+      • Dịch truyền <b>dè dặt ≤ 500 mL</b> — truyền nhiều làm nặng thêm suy thất phải.<br>
+      • Oxy giữ SpO₂ ≥ 90 %; thận trọng khi đặt nội khí quản và thở áp lực dương (dễ truỵ huyết động — Vt ~6 mL/kg cân nặng lý tưởng, PEEP thấp, khởi mê tránh thuốc làm tụt mạnh sức cản mạch hệ thống).<br>
+      • <b>Tái tưới máu:</b> tiêu sợi huyết <b>Alteplase 100 mg truyền trong 2 giờ</b>, kèm <b>UFH</b> bolus 80 UI/kg = <b>${bolus}</b> rồi truyền 18 UI/kg/giờ = <b>${ufh}</b>. Chống chỉ định hoặc thất bại → lấy huyết khối qua catheter/phẫu thuật; truỵ tuần hoàn kháng trị → VA-ECMO (IIb).<br><br>
+      <b>BƯỚC 2 — Nếu huyết động ổn định:</b> ${tier}<br><br>
+      <b>BƯỚC 3 — Kháng đông (ưu tiên DOAC, ESC Class I):</b><br>
+      • <b>Apixaban</b> 10 mg × 2 lần/ngày trong 7 ngày → 5 mg × 2 lần/ngày.<br>
+      • <b>Rivaroxaban</b> 15 mg × 2 lần/ngày trong 21 ngày → 20 mg/ngày (uống cùng thức ăn).<br>
+      • Thay thế đường tiêm: <b>Enoxaparin</b> 1 mg/kg mỗi 12 giờ = <b>${enox}</b> (hoặc 1,5 mg/kg/ngày = ${enox15}).<br>
+      • Khi dự kiến tiêu sợi huyết hoặc suy thận nặng → dùng <b>UFH</b> (dễ chỉnh, đảo ngược nhanh).<br>
+      • <b>Chức năng thận:</b> tránh DOAC khi CrCl &lt; 15 mL/phút; giảm liều enoxaparin khi CrCl &lt; 30; UFH an toàn hơn khi suy thận nặng.<br>
+      • <b>Thời gian:</b> tối thiểu 3 tháng cho mọi ca; ≥ 6 tháng và cân nhắc kéo dài nếu ung thư đang hoạt động hoặc PE không có yếu tố khởi phát.`};
+  }
  }
 ];
 
@@ -2121,13 +2186,16 @@ function renderAssess(){
   asAutoFill();
   let h = `<div class="banner warn">Các thang điểm dưới đây hỗ trợ lượng giá nguy cơ, <b>không thay thế</b> thăm khám và phán đoán lâm sàng.
     Mục có nhãn <span class="autotag">tự điền</span> được app suy ra từ tuổi, giới và BMI ở đầu trang — bấm tay để sửa nếu chưa đúng.</div>`;
+  h += `<div class="picker" id="asjump">` + SCORES.map(sc =>
+     `<button data-goto="as-${sc.id}">${sc.name.split(/[—–&(]/)[0].trim()}</button>`
+   ).join("") + `<button data-goto="as-met">MET</button></div>`;
   for(const sc of SCORES){
-    h += `<div class="card"><h2>${sc.name}</h2>
+    h += `<div class="card" id="as-${sc.id}" style="scroll-margin-top:64px"><h2>${sc.name}</h2>
       <div class="assub">${sc.short} · <i>${sc.src}</i></div>
       ${sc.items.map(it => asItemHtml(sc, it)).join("")}
       <div data-asres="${sc.id}">${asResultHtml(sc)}</div></div>`;
   }
-  h += `<div class="card"><h2>Khả năng gắng sức (MET)</h2>
+  h += `<div class="card" id="as-met" style="scroll-margin-top:64px"><h2>Khả năng gắng sức (MET)</h2>
     <div class="asitem"><div class="asq">Mốc 4 MET là ranh giới kinh điển
       <div class="ash">Dưới 4 MET được coi là khả năng gắng sức kém.</div></div></div>
     <div class="note" style="background:var(--card)">
@@ -2155,6 +2223,10 @@ function renderAssess(){
     if(tag) tag.remove();
     const box = document.querySelector(`[data-asres="${id}"]`);
     if(box) box.innerHTML = asResultHtml(sc);
+  }));
+  $("p-assess").querySelectorAll("#asjump button").forEach(b => b.addEventListener("click", () => {
+    const el = $(b.dataset.goto);
+    if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
   }));
 }
 
@@ -2731,7 +2803,22 @@ function anticoSurg(){
 }
 
 function anticoRegional(){
-  let h = `<div class="banner dg">Khoảng chờ cho <b>gây tê trục thần kinh</b> và các block sâu cạnh trục thần kinh — chặt chẽ hơn nhiều so với mổ thường vì máu tụ ngoài màng cứng có thể gây liệt vĩnh viễn. Block nông có thể nới lỏng hơn.</div>`;
+  const t = ANTICO_TAB.reg || "nx";
+  let h = `<div class="banner dg">Khoảng chờ cho <b>gây tê trục thần kinh</b> và block sâu cạnh trục — chặt chẽ hơn nhiều so với mổ thường vì máu tụ ngoài màng cứng có thể gây liệt vĩnh viễn. Block nông ép được thì nới lỏng hơn. <b>Chọn loại kỹ thuật:</b></div>`;
+  h += `<div class="ctxrow" style="padding:0 0 12px"><button type="button" data-regtype="nx" class="${t==="nx"?"on":""}">Trục thần kinh</button><button type="button" data-regtype="deep" class="${t==="deep"?"on":""}">Block sâu</button><button type="button" data-regtype="sup" class="${t==="sup"?"on":""}">Block nông</button></div>`;
+  h += (t==="nx")
+    ? `<div class="card"><h2>Gây tê trục thần kinh</h2><div class="note" style="background:var(--card)">Tê tuỷ sống, tê ngoài màng cứng — gồm cả <b>đặt và rút catheter NMC</b>. Nguy cơ cao nhất: máu tụ ngoài màng cứng gây liệt. <b>Áp dụng đầy đủ khoảng chờ dưới đây.</b></div></div>`
+    : (t==="deep")
+    ? `<div class="card"><h2>Block sâu, không ép được</h2><div class="note" style="background:var(--card)">Đám rối thắt lưng (lumbar plexus), cạnh cột sống (paravertebral), thần kinh toạ đường gần, các block sâu cạnh trục khác. <b>ESAIC 2022: xử trí như trục thần kinh</b> vì không ép cầm máu tại chỗ được → áp dụng đầy đủ khoảng chờ dưới đây.<br><i>ESAIC 2022 — Kietaibl S. Eur J Anaesthesiol 2022;39(2):100–132. DOI: 10.1097/EJA.0000000000001600</i></div></div>`
+    : `<div class="card"><h2>Block nông, ép được</h2>
+      <div class="asres ok"><b class="rh">Nguyên tắc: không có khoảng chờ theo từng thuốc</b><div class="rb">Có thể tê <b>ngay cả khi đang dùng chống đông hoặc kháng kết tập tiểu cầu</b> — <b>không bắt buộc ngừng thuốc</b>, không áp bảng thời gian như trục thần kinh. Lý do: nếu chảy máu thì ở vị trí ép được, hậu quả nhẹ, dễ xử lý, hiếm khi phải can thiệp (ESAIC/ESRA 2022, khuyến cáo 18 &amp; 38).<br>Nhóm điển hình: liên cơ bậc thang, trên đòn, nách, cổ tay/khuỷu; mặt phẳng cân nông (TAP, PECS, SAP); thâm nhiễm vết mổ.</div></div>
+      <div class="note" style="background:var(--card)"><b>Ba điểm phải cân nhắc trước khi coi một block là "nông, ép được":</b><br>
+        • <b>Block cạnh mạch máu lớn</b> (đùi, ống cơ khép, toạ khoeo): ESAIC xếp nông, nhưng <b>ASRA xếp nguy cơ TRUNG GIAN</b> → thận trọng hơn, nhất là khi đang chống đông liều điều trị. <i>(khác biệt giữa hai guideline)</i><br>
+        • <b>Block mặt phẳng cân không "vô hại":</b> loạt ca PECS ghi nhận tụ máu, phần lớn ở bệnh nhân đang dùng chống đông/kháng tiểu cầu — ESAIC nhấn mạnh block cân dưới siêu âm <b>vẫn có nguy cơ</b>.<br>
+        • <b>PENG</b> bị ESAIC xếp là block <b>SÂU</b> → hoãn như trục thần kinh (trừ aspirin liều thấp), dù quen nghĩ là nông.<br>
+        Tóm lại: "đang dùng thuốc gì cũng tê được, miễn ép được" đúng với block nông <b>thực sự, xa mạch lớn</b>; block cạnh mạch lớn hay cân sâu vẫn phải cân nhắc lợi ích/nguy cơ và chỉ làm ở vị trí ép được.<br>
+        <i>ESAIC/ESRA 2022 — Kietaibl S. Eur J Anaesthesiol 2022;39(2):100–132. DOI: 10.1097/EJA.0000000000001600 · ASRA PNB advisory — Can J Anaesth 2019. DOI: 10.1007/s12630-019-01466-w</i></div></div>`;
+  if(t!=="sup"){
   h += `<div class="card"><h2>ASRA ấn bản 5 (tháng 1/2025)</h2>
     <div class="note" style="background:var(--card);border-top:none">Bản này đổi cách gọi từ “dự phòng / điều trị” sang <b>“liều thấp / liều cao”</b>, và <b>rút ngắn</b> thời gian chờ cho thuốc chống đông đường uống liều thấp so với bản trước.
       <b>Luôn đối chiếu với phác đồ của cơ sở và chức năng thận của người bệnh.</b></div>
@@ -2741,6 +2828,7 @@ function anticoRegional(){
     ${tbl(["Thuốc","Ngừng trước khi làm","Dùng lại sau rút catheter"], ASRA_AC)}
     <div class="note">Bản 5 cho phép dựa vào <b>nồng độ thuốc còn lại</b> để rút ngắn thời gian chờ khi cần làm sớm: apixaban dưới 30 ng/mL hoặc hoạt độ kháng Xa từ 0,1 IU/mL trở xuống. Với dabigatran, thời gian chờ kéo dài thêm khi mức lọc cầu thận giảm.<br>
       Sau khi rút catheter phải <b>theo dõi thần kinh ít nhất 24 giờ</b>. Yếu chân mới xuất hiện hoặc tê kéo dài bất thường phải nghĩ ngay đến máu tụ ngoài màng cứng và chụp cộng hưởng từ khẩn — giải ép trong vòng 8 giờ mới có cơ hội hồi phục.</div></div>`;
+  }
   return h;
 }
 
@@ -2759,6 +2847,9 @@ function renderAntico(){
   // chọn thuốc cần hoá giải — chỉ vẽ lại phần thân, giữ nguyên vị trí cuộn
   $("p-antico").querySelectorAll("[data-revdrug]").forEach(b => b.addEventListener("click", () => {
     REV.drug = b.dataset.revdrug; renderAntico();
+  }));
+  $("p-antico").querySelectorAll("[data-regtype]").forEach(b => b.addEventListener("click", () => {
+    ANTICO_TAB.reg = b.dataset.regtype; renderAntico(); window.scrollTo({top:0,behavior:"instant"});
   }));
 }
 
@@ -2840,6 +2931,20 @@ function renderIfChanged(){
   $(id).addEventListener("input", renderIfChanged);
   $(id).addEventListener("change", renderIfChanged);
 });
+/* Nhảy thẳng sang bảng pha truyền (Noradrenalin/Dobutamin...) ở tab Cấp cứu.
+   Dùng cho liên kết trong thẻ xử trí PE. */
+window.goInfusion = function(){
+  const btn = document.querySelector('#tabs button[data-p="p-emergency"]');
+  if(btn){
+    document.querySelectorAll("#tabs button").forEach(x => x.setAttribute("aria-selected", x===btn));
+    document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id==="p-emergency"));
+    applyTabColor(btn.dataset.key);
+  }
+  CUR_GROUP = "anes"; CUR_EVENT = "infusion-table"; PICKER_OPEN = false;
+  renderEmergency();
+  const el = $("p-emergency"); if(el) el.scrollIntoView({block:"start"});
+};
+
 buildTabs(); buildSubtabs(); renderAll();
 
 /* Xuất hàm để kiểm thử tự động */
