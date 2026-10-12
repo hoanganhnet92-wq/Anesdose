@@ -297,6 +297,19 @@ nav.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-co
   background:transparent;color:var(--warn);font:inherit;font-weight:700;font-size:12.5px}
 .revline{font-size:12px;line-height:1.4;color:var(--muted);margin:-4px 2px 10px;padding-left:2px}
 .revline.ok{color:var(--ok)}
+/* Tra nhanh block */
+.rablk{border-top:1px solid var(--line)}
+.rablk>summary{list-style:none;cursor:pointer;padding:11px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;min-height:var(--tap)}
+.rablk>summary::-webkit-details-marker{display:none}
+.rablk>summary::after{content:"▸";grid-column:2;grid-row:1/3;justify-self:end;color:var(--muted);font-size:13px;transition:transform .15s}
+.rablk[open]>summary::after{transform:rotate(90deg)}
+.ranm{font-weight:700;font-size:14.5px}
+.raen{grid-column:1;font-size:11.5px;color:var(--muted)}
+.ravol{grid-column:2;grid-row:1;justify-self:end;margin-right:20px;font-weight:700;font-size:12.5px;color:var(--accent);white-space:nowrap}
+.rabody{padding:0 14px 12px;font-size:13.5px;line-height:1.5;display:grid;gap:4px}
+.ratip{background:var(--bg);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--muted)}
+.rapdf{display:block;text-align:center;margin-top:4px;min-height:var(--tap);line-height:var(--tap);border-radius:10px;
+  background:var(--accent-soft);color:var(--accent);font-weight:700;text-decoration:none;font-size:13.5px}
 /* Tìm phác đồ */
 .evsearch{position:relative;margin-bottom:10px}
 .evsearch input{width:100%;box-sizing:border-box;min-height:46px;padding:10px 40px 10px 14px;border-radius:12px;
@@ -876,6 +889,9 @@ function blockRows(){
 }
 
 function updateBlockTable(){
+  if($("raCard") && !$("raCard").contains(document.activeElement)){ const open = [...document.querySelectorAll("#raCard details[open] .ranm")].map(x=>x.textContent);
+    $("raCard").outerHTML = raCardHTML(); raBind();
+    document.querySelectorAll("#raCard details").forEach(dd => { if(open.includes(dd.querySelector(".ranm").textContent)) dd.open = true; }); }
   const el = $("blkBody"); if(el) el.innerHTML = blockRows();
   const d = locDrug(), c = locConc(), w = locWeight();
   const cap = $("blkCap");
@@ -914,11 +930,56 @@ function caudalCard(){
   return h;
 }
 
+const RA_PDF = {"tren": {"label": "Chi trên.pdf", "id": "1qyzJ-An2f9FmJeJRTcy9SgBrHFhnUiKo"}, "duoi": {"label": "Chi dưới.pdf", "id": "1pvvrpzNeK3YifnsVF_cg560ksVlrpBS-"}, "than": {"label": "Thân mình.pdf", "id": "1PZDuNUm0qNS-_N1YCZ_JWdBojnz4N9vW"}};
+const RA_BLOCKS = [{"r":"tren","p":3,"n":"Liên cơ bậc thang","en":"Interscalene","ind":"Mổ vai, cánh tay trên, 2/3 ngoài xương đòn","pos":"Nửa ngồi, đầu quay sang bên đối diện","mark":"Ngang C6, giữa cơ ức đòn chũm và TM cảnh ngoài; truy ngược từ hố trên đòn","probe":"Thẳng (linear)","needle":"22G, 5 cm","vol":"7–15 mL","lo":7,"hi":15,"tip":"Kim trong mặt phẳng từ ngoài vào để tránh thần kinh vai sau và ngực dài. Thân dưới (C8–T1) thường không tê. Gần như luôn liệt hoành cùng bên."},{"r":"tren","p":13,"n":"Trên đòn","en":"Supraclavicular","ind":"Mổ cánh tay, khuỷu, cẳng tay, bàn tay","pos":"Nửa ngồi, đầu quay sang bên đối diện","mark":"Giữa xương đòn, đám rối nằm ngoài ĐM dưới đòn","probe":"Thẳng","needle":"22G vát ngắn, 5 cm","vol":"20–25 mL","lo":20,"hi":25,"tip":"Luôn thấy đầu kim — màng phổi và xương sườn 1 ngay bên dưới. Không làm hai bên."},{"r":"tren","p":21,"n":"Dưới đòn","en":"Infraclavicular","ind":"Mổ cánh tay, khuỷu, cẳng tay, bàn tay; phù hợp đặt catheter","pos":"Nằm ngửa, dạng tay 90° và gấp khuỷu (nâng xương đòn, nông hơn)","mark":"Xương đòn và mỏm quạ; thân bó quanh ĐM nách sau cơ ngực","probe":"Thẳng","needle":"22G vát ngắn, 5–10 cm","vol":"20–25 mL","lo":20,"hi":25,"tip":"Mục tiêu tiêm phía sau ĐM nách để thuốc bao quanh cả ba thân bó."},{"r":"tren","p":31,"n":"Sườn đòn","en":"Costoclavicular","ind":"Như dưới đòn; cũng dùng giảm đau mổ vai","pos":"Nằm ngửa, đầu quay đối diện, dạng tay 90° nếu được","mark":"Điểm giữa xương đòn – mỏm quạ, ngay dưới xương đòn","probe":"Thẳng","needle":"22G vát ngắn, 5 cm","vol":"15–20 mL","lo":15,"hi":20,"tip":"Ba thân bó nằm sát nhau ngoài ĐM nách — một mũi tiêm vào giữa thường đủ."},{"r":"tren","p":39,"n":"Nách","en":"Axillary","ind":"Mổ khuỷu, cẳng tay, bàn tay","pos":"Dạng tay 90° bộc lộ hố nách","mark":"Rãnh delta–ngực, cơ nhị đầu ở nếp nách","probe":"Thẳng","needle":"22–23G vát ngắn, 5 cm","vol":"~20 mL","lo":20,"hi":20,"tip":"Chia liều: khoảng 8 mL trên ĐM, 8 mL dưới ĐM, 4 mL cho thần kinh cơ bì (nằm trong cơ quạ cánh tay)."},{"r":"tren","p":49,"n":"Thần kinh trên vai ± nách","en":"Suprascapular / shoulder block","ind":"Giảm đau vai khi không chịu được liệt hoành (suy hô hấp)","pos":"Ngồi, tay khép, vai thả lỏng (hoặc nằm nghiêng bên block lên trên)","mark":"Tiếp cận trên đòn hoặc hố trên gai","probe":"Thẳng (trên đòn) hoặc cong (trên gai)","needle":"5–10 cm","vol":"5–10 mL mỗi dây","lo":5,"hi":10,"tip":"Thay thế liên cơ bậc thang ở bệnh nhân hô hấp kém; kết hợp block thần kinh nách cho vai trước–sau."},{"r":"tren","p":61,"n":"Quay / giữa / trụ ở khuỷu","en":"Above-elbow nerve blocks","ind":"Mổ cẳng tay, cổ tay, bàn tay; bổ sung khi block đám rối chưa đủ","pos":"Nằm ngửa, dạng tay 90° trên bàn tay","mark":"Nếp khuỷu, gân nhị đầu, mỏm trên lồi cầu trong/ngoài","probe":"Thẳng","needle":"25G vát ngắn","vol":"3–5 mL mỗi dây","lo":3,"hi":5,"tip":"Dây giữa cạnh ĐM cánh tay; dây trụ ở rãnh trụ sau mỏm trên lồi cầu trong; dây quay giữa cơ cánh tay và cánh tay quay."},{"r":"tren","p":73,"n":"Cổ tay / cẳng tay xa","en":"Wrist block","ind":"Mổ bàn tay, ngón tay (không gồm cấu trúc sâu mu tay, ngón cái)","pos":"Nằm ngửa, bộc lộ mặt trong cổ tay","mark":"Cách nếp cổ tay 5–10 cm về phía gần để bắt cả nhánh gan tay","probe":"Thẳng","needle":"25G","vol":"3–5 mL mỗi dây","lo":3,"hi":5,"tip":"Nhánh cảm giác thần kinh quay làm dưới da ở bờ quay."},{"r":"duoi","p":3,"n":"Khoang cân chậu","en":"Fascia iliaca","ind":"Gãy cổ xương đùi, mổ háng","pos":"Nằm ngửa","mark":"Nếp bẹn, gai chậu trước trên; tiếp cận trên dây chằng bẹn","probe":"Thẳng","needle":"22G vát ngắn","vol":"20–30 mL","lo":20,"hi":30,"tip":"Thể tích lớn để thuốc lan lên dưới mạc chậu tới thần kinh đùi và bì đùi ngoài."},{"r":"duoi","p":13,"n":"PENG","en":"Pericapsular nerve group","ind":"Gãy xương háng, thay khớp háng (đường trước)","pos":"Nằm ngửa, chân duỗi, hơi xoay ngoài","mark":"Gai chậu trước dưới, lồi chậu mu; giữa gân cơ thắt lưng chậu và xương","probe":"Cong (thẳng ở người nhỏ)","needle":"22G, 8–10 cm","vol":"~15 mL","lo":15,"hi":20,"tip":"Giữ được vận động cơ tứ đầu tốt hơn block đùi — thuận lợi cho vận động sớm."},{"r":"duoi","p":21,"n":"Thần kinh đùi","en":"Femoral","ind":"Mổ đùi trước, gối, xương bánh chè; giảm đau gãy háng","pos":"Nằm ngửa, chân duỗi xoay ngoài nhẹ; béo phì kéo mỡ bụng lên","mark":"Nếp bẹn, ngoài ĐM đùi, dưới mạc chậu","probe":"Thẳng","needle":"22G vát ngắn, 5 cm","vol":"10–15 mL","lo":10,"hi":15,"tip":"Yếu cơ tứ đầu — nguy cơ ngã khi tập đi."},{"r":"duoi","p":29,"n":"Ống cơ khép / tam giác đùi","en":"Adductor canal / saphenous","ind":"Giảm đau mổ gối; mặt trong cẳng chân (kết hợp block ngồi cho mổ dưới gối)","pos":"Nằm ngửa, đùi dạng và xoay ngoài","mark":"Giữa đùi, dưới cơ may, cạnh ĐM đùi nông","probe":"Thẳng (cong ở người to)","needle":"22G, 5–8 cm","vol":"5–10 mL","lo":5,"hi":10,"tip":"Ít yếu cơ tứ đầu hơn block đùi."},{"r":"duoi","p":37,"n":"Bì đùi ngoài","en":"Lateral femoral cutaneous","ind":"Mổ mặt trước ngoài đùi (lấy da ghép), sinh thiết cơ","pos":"Nằm ngửa, chân duỗi","mark":"Dưới–trong gai chậu trước trên, trên mặt cơ may","probe":"Thẳng","needle":"25G, 4 cm","vol":"3–5 mL","lo":3,"hi":5,"tip":"Thần kinh thuần cảm giác — không gây yếu cơ."},{"r":"duoi","p":43,"n":"Thần kinh bịt","en":"Obturator","ind":"Bổ sung giảm đau háng/gối; chống phản xạ khép đùi khi cắt u bàng quang qua niệu đạo","pos":"Nằm ngửa, đùi hơi dạng xoay ngoài","mark":"Nếp bẹn, giữa cơ khép dài – ngắn – lớn","probe":"Thẳng (cong ở người to)","needle":"21–22G, 5–10 cm","vol":"5–10 mL mỗi mặt phẳng (10–15 mL đường gần)","lo":10,"hi":15,"tip":"Đường xa: tiêm 2 mặt phẳng (nhánh trước và sau); đường gần: một mũi giữa cơ lược và cơ bịt ngoài."},{"r":"duoi","p":51,"n":"Thần kinh ngồi (mông / dưới mông / trước)","en":"Sciatic","ind":"Mổ cổ chân, bàn chân, mặt sau gối; cắt cụt trên gối","pos":"Nghiêng (tư thế Sims) hoặc sấp; đường trước nằm ngửa, háng dạng xoay ngoài","mark":"Nếp mông (dưới mông); ụ ngồi – mấu chuyển lớn (mông)","probe":"Cong tần số thấp (thẳng cho dưới mông)","needle":"22G, 8–10 cm","vol":"15–20 mL","lo":15,"hi":20,"tip":"Thần kinh sâu — nên dùng kích thích thần kinh kèm siêu âm, tiêm chậm, theo dõi áp lực tiêm."},{"r":"duoi","p":61,"n":"Ngồi đường khoeo","en":"Popliteal sciatic","ind":"Mổ bàn chân, cổ chân, gân Achilles; cắt cụt dưới gối","pos":"Sấp hoặc nghiêng; nằm ngửa kê cao chân","mark":"Trên nếp khoeo, giữa gân nhị đầu đùi (ngoài) và bán gân/bán màng (trong)","probe":"Thẳng","needle":"22G vát ngắn, 5 cm","vol":"10–20 mL","lo":10,"hi":20,"tip":"Tiêm trong bao chung (Vloka) tại hoặc ngay trên chỗ chia đôi thành chày và mác chung."},{"r":"duoi","p":69,"n":"IPACK","en":"Interspace popliteal artery – capsule of knee","ind":"Giảm đau mặt sau gối (thay khớp gối, dây chằng chéo)","pos":"Sấp hoặc ngửa, gối hơi gấp","mark":"Lồi cầu trong xương đùi, hố khoeo; tiêm giữa ĐM khoeo và xương đùi","probe":"Thẳng tần số cao hoặc cong","needle":"22G, 8–10 cm","vol":"20–25 mL","lo":15,"hi":25,"tip":"Kết hợp ống cơ khép: giảm đau gối mà giữ được vận động."},{"r":"duoi","p":79,"n":"Cổ chân","en":"Ankle block","ind":"Mổ bàn chân, cắt cụt ngón","pos":"Nằm ngửa, kê dưới bắp chân","mark":"Mắt cá trong, ngoài, gân Achilles, TM hiển","probe":"Thẳng","needle":"25G, 5 cm","vol":"5–8 mL thần kinh chày, 3–5 mL mỗi dây khác","lo":15,"hi":25,"tip":"Năm dây: chày, mác sâu, mác nông, hiển, bắp chân."},{"r":"than","p":3,"n":"Liên sườn","en":"Intercostal","ind":"Gãy xương sườn, mổ ngực, bụng trên, zona","pos":"Ngồi, nghiêng hoặc sấp","mark":"Đầu dò dọc xác định xương sườn, tiêm ở bờ dưới","probe":"Thẳng","needle":"22–25G, 3–5 cm","vol":"3–5 mL mỗi mức","lo":3,"hi":5,"tip":"Hấp thu toàn thân rất nhanh — cộng tổng liều mọi mức so với liều tối đa."},{"r":"than","p":13,"n":"PECS I / II và cơ răng trước","en":"PECS / serratus plane","ind":"PECS I: vú, xương đòn; PECS II: vú mở rộng, nạo hạch; cơ răng trước: thành ngực trước bên, gãy sườn","pos":"Ngửa hoặc nghiêng, tay cùng bên dạng 90°","mark":"Xương đòn, cơ ngực lớn, đường nách trước–giữa","probe":"Thẳng","needle":"22G vát ngắn, 5–10 cm","vol":"10–20 mL","lo":10,"hi":20,"tip":"PECS I: giữa ngực lớn – ngực bé; PECS II thêm giữa ngực bé – răng trước; serratus: trên hoặc dưới cơ răng trước ở đường nách giữa."},{"r":"than","p":23,"n":"Cạnh sống ngực","en":"Paravertebral (PVB)","ind":"Mổ vú, mở ngực, gãy sườn, thành ngực – bụng trên","pos":"Ngồi (hoặc sấp / nghiêng bên block lên)","mark":"Đầu dò cạnh dọc cách đường giữa ~3 cm, giữa hai mỏm ngang","probe":"Thẳng","needle":"21–22G, 8–10 cm","vol":"4–5 mL mỗi khoang","lo":4,"hi":5,"tip":"Thấy màng phổi bị đẩy xuống khi tiêm. Nguy cơ tràn khí màng phổi, lan ngoài màng cứng."},{"r":"than","p":33,"n":"Cơ dựng sống","en":"Erector spinae plane (ESP)","ind":"Gãy sườn, mổ cột sống, thành ngực","pos":"Ngồi, nghiêng hoặc sấp","mark":"Đầu mỏm ngang ở mức cần block (đếm từ xương sườn 1 bằng siêu âm)","probe":"Thẳng hoặc cong","needle":"22G vát ngắn, 5–10 cm","vol":"20–30 mL","lo":20,"hi":30,"tip":"Tiêm sâu cơ dựng sống, chạm mỏm ngang — an toàn, thuốc lan nhiều mức đốt."},{"r":"than","p":41,"n":"TAP (dưới sườn / bên / sau) và chậu bẹn","en":"Transversus abdominis plane","ind":"Đau thành bụng và phúc mạc thành","pos":"Ngửa (dưới sườn, bên); nghiêng (sau)","mark":"Dưới sườn: bờ sườn, mũi ức; bên/sau: mào chậu, đường nách giữa; chậu bẹn: gai chậu trước trên – rốn","probe":"Thẳng (cong ở người to)","needle":"22G, 5–10 cm","vol":"15–30 mL","lo":15,"hi":30,"tip":"Tiêm giữa cơ chéo trong và cơ ngang bụng. Không giảm đau tạng. Làm hai bên thì cộng tổng liều."},{"r":"than","p":55,"n":"Bao cơ thẳng bụng","en":"Rectus sheath","ind":"Vết mổ đường giữa (thoát vị rốn, quanh rốn)","pos":"Nằm ngửa","mark":"Đường giữa, mũi ức, rốn","probe":"Thẳng","needle":"22G, 5–10 cm","vol":"10–15 mL mỗi bên","lo":10,"hi":15,"tip":"Tiêm sau cơ thẳng, trước lá sau bao cơ — chặn nhánh da trước của thần kinh liên sườn."},{"r":"than","p":63,"n":"Cơ vuông thắt lưng","en":"Quadratus lumborum (QL1/2/3)","ind":"Thành bụng trước bên, phúc mạc thành; mổ háng (QL3)","pos":"Nghiêng (làm được QL1, 2, 3); ngửa chỉ cho QL1","mark":"Mào chậu, bờ sườn, đường nách giữa – sau ('dấu hiệu cỏ ba lá')","probe":"Thẳng hoặc cong","needle":"22G vát ngắn, 5–10 cm","vol":"15–20 mL","lo":15,"hi":20,"tip":"QL1 bên, QL2 sau, QL3 trước cơ vuông thắt lưng. Có thể yếu cơ tứ đầu sau QL3."}];
+
+/* Tra nhanh tài liệu gây tê vùng — tóm tắt tự viết + mở PDF gốc trong Drive của người dùng */
+let RA_Q = "", RA_REG = "all";
+function raCardHTML(){
+  const d = locDrug(), c = locConc(), w = locWeight(), maxMg = d.plain * w;
+  const q = foldVN(RA_Q).trim();
+  const list = RA_BLOCKS.filter(b => (RA_REG === "all" || b.r === RA_REG) &&
+    (!q || q.split(/\s+/).every(t => foldVN([b.n,b.en,b.ind,b.mark,b.tip].join(" ")).includes(" " + t))));
+  const regs = [["all","Tất cả"],["tren","Chi trên"],["duoi","Chi dưới"],["than","Thân mình"]];
+  let h = `<div class="card" id="raCard"><h2>Tra nhanh block — tài liệu của bạn</h2>
+    <div style="padding:12px 14px 4px">
+      <div class="evsearch" style="margin-bottom:8px"><input id="raQ" type="search" placeholder="Tìm block: vai, gối, háng, sườn, TAP…" autocomplete="off" value="${RA_Q.replace(/"/g,"&quot;")}"></div>
+      <div class="ctxrow">${regs.map(([k,l]) => `<button type="button" data-rareg="${k}" class="${RA_REG===k?"on":""}">${l}</button>`).join("")}</div>
+    </div>
+    <div class="note" style="border-top:none;background:var(--card);padding-top:4px">Đang tính cho <b>${d.n} ${c} %</b>, ${sig(w)} kg — liều tối đa <b>${sig(maxMg)} mg</b> = <b>${sig(maxMg/(c*10))} mL</b>. Đổi thuốc/nồng độ ở bảng "Thể tích gợi ý" bên dưới.</div>`;
+  if(!list.length) h += `<div class="note">Không có block phù hợp.</div>`;
+  for(const b of list){
+    const pdf = RA_PDF[b.r];
+    const mgLo = b.lo*c*10, mgHi = b.hi*c*10, pct = Math.round(mgHi/maxMg*100);
+    const tone = pct > 100 ? "var(--danger)" : pct > 70 ? "var(--warn)" : "var(--ok)";
+    h += `<details class="rablk"><summary><span class="ranm">${b.n}</span><span class="raen">${b.en}</span><span class="ravol">${b.vol}</span></summary>
+      <div class="rabody">
+        <div><b>Chỉ định:</b> ${b.ind}</div>
+        <div><b>Tư thế:</b> ${b.pos}</div>
+        <div><b>Mốc / đích:</b> ${b.mark}</div>
+        <div><b>Đầu dò:</b> ${b.probe} · <b>Kim:</b> ${b.needle}</div>
+        <div><b>Thể tích:</b> ${b.vol} → ${rng(mgLo, mgHi, "mg")} ${d.n} ${c} % · <b style="color:${tone}">${pct} % liều tối đa</b></div>
+        <div class="ratip">${b.tip}</div>
+        <a class="rapdf" href="https://drive.google.com/file/d/${pdf.id}/view#page=${b.p}" target="_blank" rel="noopener">📄 Mở ${pdf.label} — trang ${b.p}</a>
+      </div></details>`;
+  }
+  h += `<div class="note">Tóm tắt viết lại từ phần "thông tin nhanh" trong tài liệu của bạn; hình siêu âm và chi tiết kỹ thuật xem trong PDF.
+    File PDF nằm trong Google Drive riêng của bạn — cần đăng nhập đúng tài khoản và có mạng; người khác chỉ mở được nếu bạn chia sẻ.
+    Trình xem Drive trên điện thoại có thể không tự nhảy tới trang — vuốt tới số trang ghi trên nút.</div></div>`;
+  return h;
+}
+function raBind(){
+  const q = $("raQ"); if(!q) return;
+  q.addEventListener("input", () => { RA_Q = q.value; const pos = q.selectionStart; $("raCard").outerHTML = raCardHTML(); raBind(); const q2=$("raQ"); q2.focus(); q2.setSelectionRange(pos,pos); });
+  $("raCard").querySelectorAll("[data-rareg]").forEach(b => b.addEventListener("click", () => { RA_REG = b.dataset.rareg; $("raCard").outerHTML = raCardHTML(); raBind(); }));
+}
+
 function renderLocal(){
   const w = locWeight();
   const d = locDrug(), c = locConc();
   let h = `<div class="banner dg"><b>Liều tối đa an toàn</b> — tính theo ${sig(w)} kg. Ở người béo phì dùng cân nặng hiệu chỉnh; ở trẻ nhỏ, người suy gan/tim, thai phụ cần giảm thêm. Luôn hút thử trước khi bơm, tiêm chậm và chia nhỏ liều.</div>`;
 
+  h += raCardHTML();
   h += `<div class="card"><h2>Thuốc tê — liều tối đa</h2><div class="scrollx"><table>
    <tr><th>Thuốc</th><th class="n">Không adrenalin</th><th class="n">Có adrenalin</th><th>Thể tích tối đa theo nồng độ</th></tr>`;
   for(const L of LOCALS){
@@ -958,6 +1019,7 @@ function renderLocal(){
   h += `<div class="note" style="text-align:center;background:var(--card)">Khoảng chờ thuốc chống đông trước khi gây tê trục thần kinh đã chuyển sang <b>tab Chống đông → Gây tê vùng</b>.</div>`;
 
   $("p-local").innerHTML = h;
+  raBind();
 
   $("p-local").querySelectorAll("[data-ldrug]").forEach(b => b.addEventListener("click", () => {
     LOC_SEL.drug = +b.dataset.ldrug; LOC_SEL.conc = null; renderLocal();
