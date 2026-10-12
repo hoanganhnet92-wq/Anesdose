@@ -427,6 +427,7 @@ main.wrap{padding-bottom:84px}
 <div class="codesheet" id="codeSheet" hidden><div class="codebox" id="codeBox"></div></div>
 <div class="pdfv" id="pdfv" hidden>
   <div class="bar"><span class="t" id="pdfvT"></span>
+    <button type="button" id="pdfvPin" aria-label="Ghim trang này làm trang đầu của block" title="Ghim trang này làm trang đầu block">📌</button>
     <button type="button" id="pdfvOut" aria-label="Thu nhỏ">−</button><button type="button" id="pdfvIn" aria-label="Phóng to">+</button>
     <button type="button" id="pdfvX" aria-label="Đóng">✕</button></div>
   <div class="sc" id="pdfvSc"><canvas id="pdfvC"></canvas><div class="msg" id="pdfvM"></div></div>
@@ -992,8 +993,8 @@ function raCardHTML(){
         <div><b>Đầu dò:</b> ${b.probe} · <b>Kim:</b> ${b.needle}</div>
         <div><b>Thể tích:</b> ${b.vol} → ${rng(mgLo, mgHi, "mg")} ${d.n} ${c} % · <b style="color:${tone}">${pct} % liều tối đa</b></div>
         <div class="ratip">${b.tip}</div>
-        ${RA_HAVE[b.r] ? `<button type="button" class="raview" data-raview="${RA_BLOCKS.indexOf(b)}">🖼 Xem trang ${b.p}–${raRange(b)[1]} có hình (trên máy)</button>` : ""}
-        <a class="rapdf" href="https://drive.google.com/file/d/${pdf.id}/view#page=${b.p}" target="_blank" rel="noopener">📄 Mở ${pdf.label} trong Drive — trang ${b.p}</a>
+        ${RA_HAVE[b.r] ? `<button type="button" class="raview" data-raview="${RA_BLOCKS.indexOf(b)}">🖼 Xem trang ${raRange(b)[0]}–${raRange(b)[1]} có hình <small style="font-weight:600;opacity:.8">(${raSrc(b)})</small></button>` : ""}
+        <a class="rapdf" href="https://drive.google.com/file/d/${pdf.id}/view#page=${raStart(b)}" target="_blank" rel="noopener">📄 Mở ${pdf.label} trong Drive — trang ${raStart(b)}</a>
       </div></details>`;
   }
   h += `<div class="note">Tóm tắt viết lại từ phần "thông tin nhanh" trong tài liệu của bạn; hình siêu âm và chi tiết kỹ thuật xem trong PDF.
@@ -3475,7 +3476,7 @@ async function raDel(key){ const db = await raDb(); return new Promise((ok,no)=>
 let RA_HAVE = {};          // r -> {name, size, pages}
 async function raRefreshHave(){
   RA_HAVE = {};
-  try{ for(const r of Object.keys(RA_PDF)){ const v = await raGet(r); if(v) RA_HAVE[r] = {name:v.name, size:v.blob.size, pages:v.pages||null}; } }catch(e){}
+  try{ for(const r of Object.keys(RA_PDF)){ const v = await raGet(r); if(v) RA_HAVE[r] = {name:v.name, size:v.blob.size, pages:v.pages||null, qi:v.qi||null}; } }catch(e){}
 }
 
 /* pdf.js tải lười từ cdnjs (được service worker lưu lại để dùng offline) */
@@ -3518,7 +3519,10 @@ async function raImport(files, forced){
     if(!r){ msgs.push(`${f.name}: không nhận ra là Chi trên / Chi dưới / Thân mình — dùng nút "Chọn" ở đúng dòng`); continue; }
     try{
       await raPut(r, {name:f.name, blob:f, t:Date.now()}); delete RA_DOCS[r];
-      msgs.push(`✓ ${RA_PDF[r].label} ← ${f.name}`);
+      let found = "";
+      try{ const qi = await raIndex(r); const nb = RA_BLOCKS.filter(x => x.r === r).length;
+        found = qi.length === nb ? ` — dò được đủ ${nb} block` : ` — dò được ${qi.length}/${nb} block, dùng số trang ước tính (có thể ghim tay 📌)`; }catch(e){ found = " — chưa dò được trang (sẽ dò khi mở lần đầu)"; }
+      msgs.push(`✓ ${RA_PDF[r].label} ← ${f.name}${found}`);
     }catch(e){ msgs.push(`${f.name}: không lưu được (bộ nhớ trình duyệt đầy hoặc bị chặn)`); }
   }
   try{ if(navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }catch(e){}
@@ -3538,17 +3542,52 @@ function raDocsHTML(){
   <div class="radoc"><span class="st no">Hoặc chọn cả 3 file một lần (nhận theo tên file)</span>
     <label>Chọn nhiều<input type="file" accept="application/pdf,.pdf" multiple data-raimp=""></label></div></div>`;
 }
+/* Dò trang mở đầu từng block: trang có tiêu đề "Thông tin nhanh" (quét chữ trong PDF thật) */
+async function raIndex(r){
+  const v = await raGet(r); if(!v) return null;
+  if(v.qi && v.qi.length) return v.qi;
+  const doc = await raOpenDoc(r);
+  const qi = [];
+  for(let i = 1; i <= doc.numPages; i++){
+    try{
+      const tc = await (await doc.getPage(i)).getTextContent();
+      if(foldVN(tc.items.map(x => x.str).join(" ")).includes(" thong tin nhanh ")) qi.push(i);
+    }catch(e){}
+  }
+  v.qi = qi; v.pages = doc.numPages;
+  try{ await raPut(r, v); }catch(e){}
+  if(RA_HAVE[r]){ RA_HAVE[r].qi = qi; RA_HAVE[r].pages = doc.numPages; }
+  return qi;
+}
+const raOvrKey = b => `anesdose.ra.ovr.${b.r}.${b.p}`;
+function raOvr(b){ try{ const v = +localStorage.getItem(raOvrKey(b)); return v > 0 ? v : null; }catch(e){ return null; } }
+/* Trang bắt đầu của block: ghim tay > dò tự động (khi số trang dò được khớp số block) > số trang mặc định */
+function raStart(b){
+  const o = raOvr(b); if(o) return o;
+  const same = RA_BLOCKS.filter(x => x.r === b.r).sort((a,c)=>a.p-c.p);
+  const qi = RA_HAVE[b.r] && RA_HAVE[b.r].qi;
+  if(qi && qi.length === same.length) return qi[same.indexOf(b)];
+  return b.p;
+}
+function raSrc(b){
+  if(raOvr(b)) return "ghim tay";
+  const same = RA_BLOCKS.filter(x => x.r === b.r);
+  const qi = RA_HAVE[b.r] && RA_HAVE[b.r].qi;
+  return (qi && qi.length === same.length) ? "tự dò" : "ước tính";
+}
 /* Khoảng trang của block: từ trang đầu tới trước block kế tiếp trong cùng file */
 function raRange(b){
-  const same = RA_BLOCKS.filter(x => x.r === b.r).map(x => x.p).sort((a,c)=>a-c);
-  const nx = same.find(p => p > b.p);
-  const end = nx ? nx - 1 : ((RA_HAVE[b.r] && RA_HAVE[b.r].pages) || b.p + 9);
-  return [b.p, end];
+  const st = raStart(b);
+  const nexts = RA_BLOCKS.filter(x => x.r === b.r && x !== b).map(raStart).filter(p => p > st);
+  const nx = nexts.length ? Math.min(...nexts) : null;
+  const end = nx ? nx - 1 : ((RA_HAVE[b.r] && RA_HAVE[b.r].pages) || st + 9);
+  return [st, Math.max(st, end)];
 }
 let PV = {r:null, page:1, from:1, to:1, zoom:1, title:"", task:null};
 async function raShow(){
   const v = $("pdfv"), c = $("pdfvC"), m = $("pdfvM");
-  $("pdfvT").textContent = `${PV.title} · trang ${PV.page} (${PV.page - PV.from + 1}/${PV.to - PV.from + 1})`;
+  const inR = PV.page >= PV.from && PV.page <= PV.to;
+  $("pdfvT").textContent = `${PV.title} · tr. ${PV.page}` + (inR ? ` (${PV.page - PV.from + 1}/${PV.to - PV.from + 1})` : " · ngoài phần block");
   $("pdfvPrev").disabled = PV.page <= 1;
   try{
     m.textContent = "Đang mở…"; c.style.display = "none";
@@ -3570,9 +3609,11 @@ async function raShow(){
     c.style.display = "none"; m.textContent = (e && e.message) || "Không mở được trang.";
   }
 }
-function raOpenViewer(b){
+async function raOpenViewer(b){
+  if(!(RA_HAVE[b.r] && RA_HAVE[b.r].qi)){ $("pdfv").hidden = false; $("pdfvT").textContent = b.n; $("pdfvM").textContent = "Đang dò trang lần đầu…"; $("pdfvC").style.display = "none";
+    try{ await raIndex(b.r); }catch(e){} }
   const [from, to] = raRange(b);
-  PV = {r:b.r, page:b.p, from, to, zoom:1, title:b.n, task:null};
+  PV = {r:b.r, page:from, from, to, zoom:1, title:b.n, task:null, blk:b};
   $("pdfv").hidden = false; document.body.style.overflow = "hidden"; $("pdfvSc").scrollTop = 0;
   try{ history.pushState({pdfv:1}, ""); }catch(e){}
   raShow();
@@ -3586,6 +3627,13 @@ window.addEventListener("popstate", () => raCloseViewer(true));   // nút Back c
 $("pdfvX").addEventListener("click", () => raCloseViewer(false));
 $("pdfvPrev").addEventListener("click", () => { if(PV.page > 1){ PV.page--; $("pdfvSc").scrollTop = 0; raShow(); } });
 $("pdfvNext").addEventListener("click", () => { PV.page++; $("pdfvSc").scrollTop = 0; raShow(); });
+$("pdfvPin").addEventListener("click", () => {
+  if(!PV.blk) return;
+  if(!confirm(`Ghim trang ${PV.page} làm trang đầu của "${PV.title}"? Lần sau nút xem sẽ mở thẳng trang này.`)) return;
+  try{ localStorage.setItem(raOvrKey(PV.blk), String(PV.page)); }catch(e){}
+  const [f, t] = raRange(PV.blk); PV.from = f; PV.to = t; raShow();
+  const c = $("raCard"); if(c){ c.outerHTML = raCardHTML(); raBind(); }
+});
 $("pdfvIn").addEventListener("click", () => { PV.zoom = Math.min(PV.zoom * 1.4, 4); raShow(); });
 $("pdfvOut").addEventListener("click", () => { PV.zoom = Math.max(PV.zoom / 1.4, 0.6); raShow(); });
 raRefreshHave().then(() => { const c = $("raCard"); if(c){ const op = [...c.querySelectorAll("details[open] .ranm")].map(x=>x.textContent); c.outerHTML = raCardHTML(); raBind();
