@@ -310,6 +310,27 @@ nav.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-co
 .ratip{background:var(--bg);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--muted)}
 .rapdf{display:block;text-align:center;margin-top:4px;min-height:var(--tap);line-height:var(--tap);border-radius:10px;
   background:var(--accent-soft);color:var(--accent);font-weight:700;text-decoration:none;font-size:13.5px}
+/* Tài liệu PDF lưu trên máy + trình xem */
+.radocs{padding:6px 14px 10px;display:grid;gap:6px}
+.radoc{display:flex;align-items:center;gap:8px;font-size:13px}
+.radoc .st{flex:1}
+.radoc .st b{font-weight:700}
+.radoc .ok{color:var(--ok)} .radoc .no{color:var(--muted)}
+.radoc label,.radoc button{min-height:36px;padding:6px 11px;border-radius:9px;border:1px solid var(--line);background:var(--bg);
+  color:var(--ink);font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;display:inline-flex;align-items:center}
+.radoc input[type=file]{display:none}
+.raview{display:block;width:100%;text-align:center;margin-top:4px;min-height:var(--tap);border-radius:10px;border:none;
+  background:var(--accent);color:var(--on-accent);font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+.pdfv{position:fixed;inset:0;z-index:80;background:#111;display:flex;flex-direction:column}
+.pdfv[hidden]{display:none}
+.pdfv .bar{display:flex;align-items:center;gap:6px;padding:8px 10px calc(8px);padding-top:calc(8px + env(safe-area-inset-top));background:#1d1f24;color:#eee}
+.pdfv .bar .t{flex:1;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdfv .bar button{min-width:42px;min-height:40px;border-radius:9px;border:1px solid #444;background:#2a2d33;color:#fff;font:inherit;font-size:16px;font-weight:700}
+.pdfv .sc{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom}
+.pdfv canvas{display:block;margin:0 auto;background:#fff}
+.pdfv .msg{color:#ccc;text-align:center;padding:30px 16px;font-size:14px}
+.pdfv .foot{display:flex;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#1d1f24}
+.pdfv .foot button{flex:1;min-height:46px;border-radius:10px;border:1px solid #444;background:#2a2d33;color:#fff;font:inherit;font-size:15px;font-weight:700}
 /* Tìm phác đồ */
 .evsearch{position:relative;margin-bottom:10px}
 .evsearch input{width:100%;box-sizing:border-box;min-height:46px;padding:10px 40px 10px 14px;border-radius:12px;
@@ -404,6 +425,13 @@ main.wrap{padding-bottom:84px}
 <main class="wrap">
 <button type="button" class="codefab" id="codeFab" hidden>⏱ <span class="t" id="codeFabT">Bấm giờ cấp cứu</span></button>
 <div class="codesheet" id="codeSheet" hidden><div class="codebox" id="codeBox"></div></div>
+<div class="pdfv" id="pdfv" hidden>
+  <div class="bar"><span class="t" id="pdfvT"></span>
+    <button type="button" id="pdfvOut" aria-label="Thu nhỏ">−</button><button type="button" id="pdfvIn" aria-label="Phóng to">+</button>
+    <button type="button" id="pdfvX" aria-label="Đóng">✕</button></div>
+  <div class="sc" id="pdfvSc"><canvas id="pdfvC"></canvas><div class="msg" id="pdfvM"></div></div>
+  <div class="foot"><button type="button" id="pdfvPrev">‹ Trang trước</button><button type="button" id="pdfvNext">Trang sau ›</button></div>
+</div>
   <section class="panel on" id="p-emergency"></section>
   <section class="panel" id="p-anes">
     <nav class="subtabs" id="subtabs"></nav>
@@ -946,6 +974,10 @@ function raCardHTML(){
       <div class="evsearch" style="margin-bottom:8px"><input id="raQ" type="search" placeholder="Tìm block: vai, gối, háng, sườn, TAP…" autocomplete="off" value="${RA_Q.replace(/"/g,"&quot;")}"></div>
       <div class="ctxrow">${regs.map(([k,l]) => `<button type="button" data-rareg="${k}" class="${RA_REG===k?"on":""}">${l}</button>`).join("")}</div>
     </div>
+    <details class="rablk"${Object.keys(RA_HAVE).length < 3 ? " open" : ""}><summary><span class="ranm">📥 Tài liệu trên máy (để xem cả hình)</span>
+      <span class="raen">${Object.keys(RA_HAVE).length}/3 file đã nạp · lưu riêng trên điện thoại này, không tải lên đâu</span></summary>
+      ${raDocsHTML()}
+      <div class="note" style="border-top:none">Cách nạp: mở 3 file trong Google Drive → ⋮ → <b>Tải xuống</b>, rồi bấm <b>Chọn nhiều</b> ở đây và chọn cả 3 file trong thư mục Tải xuống. Chỉ cần làm một lần cho mỗi máy; sau đó xem được cả khi mất mạng.</div></details>
     <div class="note" style="border-top:none;background:var(--card);padding-top:4px">Đang tính cho <b>${d.n} ${c} %</b>, ${sig(w)} kg — liều tối đa <b>${sig(maxMg)} mg</b> = <b>${sig(maxMg/(c*10))} mL</b>. Đổi thuốc/nồng độ ở bảng "Thể tích gợi ý" bên dưới.</div>`;
   if(!list.length) h += `<div class="note">Không có block phù hợp.</div>`;
   for(const b of list){
@@ -960,7 +992,8 @@ function raCardHTML(){
         <div><b>Đầu dò:</b> ${b.probe} · <b>Kim:</b> ${b.needle}</div>
         <div><b>Thể tích:</b> ${b.vol} → ${rng(mgLo, mgHi, "mg")} ${d.n} ${c} % · <b style="color:${tone}">${pct} % liều tối đa</b></div>
         <div class="ratip">${b.tip}</div>
-        <a class="rapdf" href="https://drive.google.com/file/d/${pdf.id}/view#page=${b.p}" target="_blank" rel="noopener">📄 Mở ${pdf.label} — trang ${b.p}</a>
+        ${RA_HAVE[b.r] ? `<button type="button" class="raview" data-raview="${RA_BLOCKS.indexOf(b)}">🖼 Xem trang ${b.p}–${raRange(b)[1]} có hình (trên máy)</button>` : ""}
+        <a class="rapdf" href="https://drive.google.com/file/d/${pdf.id}/view#page=${b.p}" target="_blank" rel="noopener">📄 Mở ${pdf.label} trong Drive — trang ${b.p}</a>
       </div></details>`;
   }
   h += `<div class="note">Tóm tắt viết lại từ phần "thông tin nhanh" trong tài liệu của bạn; hình siêu âm và chi tiết kỹ thuật xem trong PDF.
@@ -971,6 +1004,12 @@ function raCardHTML(){
 function raBind(){
   const q = $("raQ"); if(!q) return;
   q.addEventListener("input", () => { RA_Q = q.value; const pos = q.selectionStart; $("raCard").outerHTML = raCardHTML(); raBind(); const q2=$("raQ"); q2.focus(); q2.setSelectionRange(pos,pos); });
+  $("raCard").querySelectorAll("[data-raimp]").forEach(inp => inp.addEventListener("change", () => {
+    if(inp.files && inp.files.length) raImport([...inp.files], inp.dataset.raimp || null); }));
+  $("raCard").querySelectorAll("[data-radel]").forEach(b => b.addEventListener("click", async () => {
+    if(!confirm("Xoá file này khỏi bộ nhớ máy? (File gốc trong Drive không bị ảnh hưởng)")) return;
+    try{ await raDel(b.dataset.radel); }catch(e){} delete RA_DOCS[b.dataset.radel]; await raRefreshHave(); $("raCard").outerHTML = raCardHTML(); raBind(); }));
+  $("raCard").querySelectorAll("[data-raview]").forEach(b => b.addEventListener("click", () => raOpenViewer(RA_BLOCKS[+b.dataset.raview])));
   $("raCard").querySelectorAll("[data-rareg]").forEach(b => b.addEventListener("click", () => { RA_REG = b.dataset.rareg; $("raCard").outerHTML = raCardHTML(); raBind(); }));
 }
 
@@ -3419,6 +3458,138 @@ $("codeSheet").addEventListener("click", async e => {
   }
 });
 if(CODE.start && !CODE.end) codeWake(true);
+
+/* ===== Tài liệu PDF của người dùng: lưu trong IndexedDB trên chính máy này, KHÔNG tải lên đâu cả ===== */
+const RA_DB = "anesdose-docs", RA_STORE = "pdfs";
+function raDb(){
+  return new Promise((ok, no) => {
+    if(!("indexedDB" in window)) return no(new Error("no idb"));
+    const r = indexedDB.open(RA_DB, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(RA_STORE);
+    r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error);
+  });
+}
+async function raPut(key, val){ const db = await raDb(); return new Promise((ok,no)=>{ const t = db.transaction(RA_STORE,"readwrite"); t.objectStore(RA_STORE).put(val, key); t.oncomplete=()=>ok(); t.onerror=()=>no(t.error); }); }
+async function raGet(key){ const db = await raDb(); return new Promise((ok,no)=>{ const q = db.transaction(RA_STORE).objectStore(RA_STORE).get(key); q.onsuccess=()=>ok(q.result); q.onerror=()=>no(q.error); }); }
+async function raDel(key){ const db = await raDb(); return new Promise((ok,no)=>{ const t = db.transaction(RA_STORE,"readwrite"); t.objectStore(RA_STORE).delete(key); t.oncomplete=()=>ok(); t.onerror=()=>no(t.error); }); }
+let RA_HAVE = {};          // r -> {name, size, pages}
+async function raRefreshHave(){
+  RA_HAVE = {};
+  try{ for(const r of Object.keys(RA_PDF)){ const v = await raGet(r); if(v) RA_HAVE[r] = {name:v.name, size:v.blob.size, pages:v.pages||null}; } }catch(e){}
+}
+
+/* pdf.js tải lười từ cdnjs (được service worker lưu lại để dùng offline) */
+const PDFJS_VER = "3.11.174";
+let PDFJS = null;
+function raPdfjs(){
+  if(PDFJS) return Promise.resolve(PDFJS);
+  return new Promise((ok, no) => {
+    const sc = document.createElement("script");
+    sc.src = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER}/pdf.min.js`;
+    sc.onload = () => { PDFJS = window.pdfjsLib;
+      PDFJS.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER}/pdf.worker.min.js`; ok(PDFJS); };
+    sc.onerror = () => no(new Error("Không tải được bộ đọc PDF — cần có mạng ở lần dùng đầu tiên."));
+    document.head.appendChild(sc);
+  });
+}
+const RA_DOCS = {};        // r -> PDFDocumentProxy (mở sẵn trong phiên)
+async function raOpenDoc(r){
+  if(RA_DOCS[r]) return RA_DOCS[r];
+  const v = await raGet(r); if(!v) throw new Error("Chưa nạp file này vào máy.");
+  const lib = await raPdfjs();
+  const doc = await lib.getDocument({data: new Uint8Array(await v.blob.arrayBuffer())}).promise;
+  RA_DOCS[r] = doc;
+  if(!v.pages){ v.pages = doc.numPages; try{ await raPut(r, v); }catch(e){} }
+  return doc;
+}
+/* Đoán file thuộc vùng nào theo tên: "Chi trên", "Chi dưới", "Thân mình" (không cần dấu) */
+function raGuess(name){
+  const f = foldVN(name);
+  if(/ tren /.test(f) || / upper /.test(f)) return "tren";
+  if(/ duoi /.test(f) || / lower /.test(f)) return "duoi";
+  if(/ than /.test(f) || / trunk /.test(f)) return "than";
+  return null;
+}
+async function raImport(files, forced){
+  const msgs = [];
+  for(const f of files){
+    if(!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)){ msgs.push(`${f.name}: không phải PDF`); continue; }
+    const r = forced || raGuess(f.name);
+    if(!r){ msgs.push(`${f.name}: không nhận ra là Chi trên / Chi dưới / Thân mình — dùng nút "Chọn" ở đúng dòng`); continue; }
+    try{
+      await raPut(r, {name:f.name, blob:f, t:Date.now()}); delete RA_DOCS[r];
+      msgs.push(`✓ ${RA_PDF[r].label} ← ${f.name}`);
+    }catch(e){ msgs.push(`${f.name}: không lưu được (bộ nhớ trình duyệt đầy hoặc bị chặn)`); }
+  }
+  try{ if(navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }catch(e){}
+  await raRefreshHave();
+  const c = $("raCard"); if(c){ c.outerHTML = raCardHTML(); raBind(); }
+  if(msgs.length) alert(msgs.join("\n"));
+}
+function raDocsHTML(){
+  const mb = n => (n/1048576).toFixed(1) + " MB";
+  return `<div class="radocs">${Object.entries(RA_PDF).map(([r,p]) => {
+    const h = RA_HAVE[r];
+    return `<div class="radoc"><span class="st">${h ? `<span class="ok">✓</span> <b>${p.label}</b> <span class="no">· ${mb(h.size)} trên máy</span>`
+                                                   : `<span class="no">○</span> <b>${p.label}</b> <span class="no">· chưa nạp</span>`}</span>
+      <label>${h ? "Thay" : "Chọn"}<input type="file" accept="application/pdf,.pdf" data-raimp="${r}"></label>
+      ${h ? `<button type="button" data-radel="${r}">Xoá</button>` : ""}</div>`;
+  }).join("")}
+  <div class="radoc"><span class="st no">Hoặc chọn cả 3 file một lần (nhận theo tên file)</span>
+    <label>Chọn nhiều<input type="file" accept="application/pdf,.pdf" multiple data-raimp=""></label></div></div>`;
+}
+/* Khoảng trang của block: từ trang đầu tới trước block kế tiếp trong cùng file */
+function raRange(b){
+  const same = RA_BLOCKS.filter(x => x.r === b.r).map(x => x.p).sort((a,c)=>a-c);
+  const nx = same.find(p => p > b.p);
+  const end = nx ? nx - 1 : ((RA_HAVE[b.r] && RA_HAVE[b.r].pages) || b.p + 9);
+  return [b.p, end];
+}
+let PV = {r:null, page:1, from:1, to:1, zoom:1, title:"", task:null};
+async function raShow(){
+  const v = $("pdfv"), c = $("pdfvC"), m = $("pdfvM");
+  $("pdfvT").textContent = `${PV.title} · trang ${PV.page} (${PV.page - PV.from + 1}/${PV.to - PV.from + 1})`;
+  $("pdfvPrev").disabled = PV.page <= 1;
+  try{
+    m.textContent = "Đang mở…"; c.style.display = "none";
+    const doc = await raOpenDoc(PV.r);
+    $("pdfvNext").disabled = PV.page >= doc.numPages;
+    const pg = await doc.getPage(PV.page);
+    const vw = $("pdfvSc").clientWidth || window.innerWidth;
+    const base = pg.getViewport({scale:1});
+    const cssW = vw * PV.zoom, scale = cssW / base.width, dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const vp = pg.getViewport({scale: scale * dpr});
+    c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+    c.style.width = Math.floor(cssW) + "px"; c.style.height = Math.floor(vp.height / dpr) + "px";
+    if(PV.task) try{ PV.task.cancel(); }catch(e){}
+    PV.task = pg.render({canvasContext: c.getContext("2d"), viewport: vp});
+    await PV.task.promise; PV.task = null;
+    m.textContent = ""; c.style.display = "block";
+  }catch(e){
+    if(e && e.name === "RenderingCancelledException") return;
+    c.style.display = "none"; m.textContent = (e && e.message) || "Không mở được trang.";
+  }
+}
+function raOpenViewer(b){
+  const [from, to] = raRange(b);
+  PV = {r:b.r, page:b.p, from, to, zoom:1, title:b.n, task:null};
+  $("pdfv").hidden = false; document.body.style.overflow = "hidden"; $("pdfvSc").scrollTop = 0;
+  try{ history.pushState({pdfv:1}, ""); }catch(e){}
+  raShow();
+}
+function raCloseViewer(fromPop){
+  if($("pdfv").hidden) return;
+  $("pdfv").hidden = true; document.body.style.overflow = "";
+  if(!fromPop){ try{ if(history.state && history.state.pdfv) history.back(); }catch(e){} }
+}
+window.addEventListener("popstate", () => raCloseViewer(true));   // nút Back của điện thoại đóng trình xem
+$("pdfvX").addEventListener("click", () => raCloseViewer(false));
+$("pdfvPrev").addEventListener("click", () => { if(PV.page > 1){ PV.page--; $("pdfvSc").scrollTop = 0; raShow(); } });
+$("pdfvNext").addEventListener("click", () => { PV.page++; $("pdfvSc").scrollTop = 0; raShow(); });
+$("pdfvIn").addEventListener("click", () => { PV.zoom = Math.min(PV.zoom * 1.4, 4); raShow(); });
+$("pdfvOut").addEventListener("click", () => { PV.zoom = Math.max(PV.zoom / 1.4, 0.6); raShow(); });
+raRefreshHave().then(() => { const c = $("raCard"); if(c){ const op = [...c.querySelectorAll("details[open] .ranm")].map(x=>x.textContent); c.outerHTML = raCardHTML(); raBind();
+  document.querySelectorAll("#raCard details").forEach(dd => { if(op.includes(dd.querySelector(".ranm").textContent)) dd.open = true; }); } });
 
 /* Nhớ bệnh nhân lần trước (chỉ trong 12 giờ, và luôn báo rõ là số cũ) */
 const PT_KEY = "anesdose.patient.v1", PT_TTL = 12*3600*1000;
