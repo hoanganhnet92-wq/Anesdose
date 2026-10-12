@@ -311,6 +311,47 @@ nav.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-co
   border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px}
 .evres .empty{padding:12px 14px;color:var(--muted);font-size:13px}
 
+/* Đồng hồ & nhật ký cấp cứu */
+.codefab{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;min-height:52px;padding:0 18px;
+  border-radius:26px;border:none;background:var(--t-emergency);color:#fff;font:inherit;font-weight:800;font-size:15px;
+  box-shadow:0 4px 16px rgba(0,0,0,.35);display:flex;align-items:center;gap:8px;cursor:pointer}
+.codefab[hidden]{display:none}
+.codefab.run{background:var(--danger);animation:none}
+.codefab .t{font-variant-numeric:tabular-nums}
+.codesheet{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
+.codesheet[hidden]{display:none}
+.codebox{width:100%;max-width:640px;max-height:92vh;overflow:auto;background:var(--card);color:var(--ink);
+  border-radius:18px 18px 0 0;padding:14px 14px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(0,0,0,.4)}
+.codehead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.codehead h3{margin:0;font-size:15px;letter-spacing:.3px;text-transform:uppercase;color:var(--t-emergency)}
+.codehead button{margin-left:auto}
+.cbtn{min-height:var(--tap);padding:8px 14px;border-radius:11px;border:1px solid var(--line);background:var(--bg);
+  color:var(--ink);font:inherit;font-weight:700;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cbtn.pri{background:var(--t-emergency);border-color:var(--t-emergency);color:#fff}
+.cbtn.warn{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.cbtn.dg{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+.ctimers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.ctile{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--bg)}
+.ctile .lb{font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--muted);text-transform:uppercase}
+.ctile .big{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:2px}
+.ctile .sm{font-size:12px;color:var(--muted);margin-top:2px;min-height:16px}
+.ctile.alert{border-color:var(--danger);background:var(--danger-soft)} .ctile.alert .big{color:var(--danger)}
+.ctile.amber{border-color:var(--warn);background:var(--warn-soft)} .ctile.amber .big{color:var(--warn)}
+.ctile.full{grid-column:1/3}
+.cgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.cgrid .cbtn{text-align:left;line-height:1.25}
+.cgrid .cbtn small{display:block;font-weight:600;font-size:11.5px;color:inherit;opacity:.8}
+.clog{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.clog div{display:grid;grid-template-columns:52px 52px 1fr;gap:6px;padding:8px 11px;border-bottom:1px solid var(--line);font-size:13.5px}
+.clog div:last-child{border-bottom:none}
+.clog .tm{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px}
+.clog .el{font-variant-numeric:tabular-nums;font-weight:700;font-size:12.5px}
+.clog .empty{display:block;color:var(--muted)}
+.cfoot{display:flex;flex-wrap:wrap;gap:8px}
+.cnote{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.4}
+@keyframes cflash{0%,100%{opacity:1}50%{opacity:.35}}
+.ctile.alert .big{animation:cflash 1s infinite}
+
 /* Màn hình nằm ngang / màn hình thấp: chỉ giữ cố định hàng tab,
    phần nhập thông số bệnh nhân cuộn đi để lấy chỗ cho nội dung */
 @media (orientation:landscape) and (max-height:560px){
@@ -343,6 +384,8 @@ nav.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-co
 </header>
 
 <main class="wrap">
+<button type="button" class="codefab" id="codeFab" hidden>⏱ <span class="t" id="codeFabT">Bấm giờ cấp cứu</span></button>
+<div class="codesheet" id="codeSheet" hidden><div class="codebox" id="codeBox"></div></div>
   <section class="panel on" id="p-emergency"></section>
   <section class="panel" id="p-anes">
     <nav class="subtabs" id="subtabs"></nav>
@@ -3080,6 +3123,7 @@ function buildTabs(){
     document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id===b.dataset.p));
     applyTabColor(b.dataset.key);
     window.scrollTo({top:0,behavior:"instant"});
+    if(typeof codeTick === "function") codeTick();
   });
   applyTabColor(TABS[0][2]);
 }
@@ -3133,6 +3177,149 @@ window.goInfusion = function(){
   renderEmergency();
   const el = $("p-emergency"); if(el) el.scrollIntoView({block:"start"});
 };
+
+/* ==================== ĐỒNG HỒ & NHẬT KÝ CẤP CỨU ====================
+   Lưu vào localStorage để tải lại trang không mất dữ liệu.
+   Thời gian tính theo mốc Date.now(), không phụ thuộc setInterval chạy đều. */
+const CODE_KEY = "anesdose.code.v1";
+let CODE = {start:null, end:null, cyc:null, log:[]};
+try{ const c = JSON.parse(localStorage.getItem(CODE_KEY) || "null"); if(c && Array.isArray(c.log)) CODE = c; }catch(e){}
+const codeSave = () => { try{ localStorage.setItem(CODE_KEY, JSON.stringify(CODE)); }catch(e){} };
+const mmss = ms => { if(ms < 0) ms = 0; const t = Math.floor(ms/1000), m = Math.floor(t/60), s = t%60;
+  return (m>=60 ? Math.floor(m/60)+":"+String(m%60).padStart(2,"0") : String(m)) + ":" + String(s).padStart(2,"0"); };
+const clock = t => { const d = new Date(t); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+":"+String(d.getSeconds()).padStart(2,"0"); };
+const CYCLE_MS = 120000;
+
+function codeDoses(){
+  const w = P.wt, ped = P.ageY < 14 && w > 0;
+  const nShock = CODE.log.filter(x => x.k === "shock").length;
+  const nAmio = CODE.log.filter(x => x.k === "amio").length;
+  return {
+    epi:   ped ? `Adrenalin ${sig(Math.min(0.01*w,1))} mg = ${sig(Math.min(0.1*w,10))} mL dd 0,1 mg/mL (0,01 mg/kg)` : "Adrenalin 1 mg TM/IO = 10 mL dd 0,1 mg/mL",
+    shock: ped ? `Sốc điện lần ${nShock+1}: ${sig(Math.min((nShock?4:2)*w, 200))} J (${nShock?4:2} J/kg)` : `Sốc điện lần ${nShock+1}: 200 J hai pha${nShock?" (bằng hoặc cao hơn lần trước)":""}`,
+    amio:  ped ? `Amiodaron ${sig(Math.min(5*w,300))} mg TM/IO (5 mg/kg)` : (nAmio ? "Amiodaron 150 mg TM/IO (liều 2)" : "Amiodaron 300 mg TM/IO (liều 1)"),
+    lido:  ped ? `Lidocain ${sig(Math.min(1*w,100))} mg TM/IO (1 mg/kg)` : `Lidocain ${sig(Math.min(1*w,100))}–${sig(Math.min(1.5*w,150))} mg TM/IO (1–1,5 mg/kg)`
+  };
+}
+function codeAdd(k, label){
+  const now = Date.now();
+  if(!CODE.start){ CODE.start = now; CODE.end = null; CODE.cyc = now; CODE.log = []; CODE.log.push({t:now, k:"start", x:"Bắt đầu cấp cứu"}); codeWake(true); }
+  if(k === "rhythm" || k === "shock") CODE.cyc = now;            // kiểm tra nhịp/sốc điện → bắt đầu chu kỳ 2 phút mới
+  if(k) CODE.log.push({t:now, k, x:label});
+  codeSave(); codeRender();
+}
+function lastOf(k){ for(let i=CODE.log.length-1;i>=0;i--) if(CODE.log[i].k===k) return CODE.log[i]; return null; }
+
+let WAKE = null;
+async function codeWake(on){
+  try{
+    if(on && "wakeLock" in navigator && !WAKE){ WAKE = await navigator.wakeLock.request("screen"); WAKE.addEventListener("release",()=>{WAKE=null;}); }
+    if(!on && WAKE){ await WAKE.release(); WAKE = null; }
+  }catch(e){}
+}
+document.addEventListener("visibilitychange", () => { if(document.visibilityState==="visible" && CODE.start && !CODE.end) codeWake(true); });
+
+let CYC_ALERTED = 0;
+function codeTick(){
+  const now = Date.now(), running = CODE.start && !CODE.end;
+  const fab = $("codeFab"), ft = $("codeFabT");
+  const onEm = document.querySelector("#p-emergency.on");
+  fab.hidden = !(onEm || running);
+  fab.classList.toggle("run", !!running);
+  ft.textContent = running ? mmss(now - CODE.start) + (CODE.cyc ? " · CPR " + mmss(CYCLE_MS - (now - CODE.cyc)) : "") : (CODE.end ? "Nhật ký cấp cứu" : "Bấm giờ cấp cứu");
+  if(running && CODE.cyc && now - CODE.cyc >= CYCLE_MS && CYC_ALERTED !== CODE.cyc){
+    CYC_ALERTED = CODE.cyc; try{ navigator.vibrate && navigator.vibrate([400,150,400,150,400]); }catch(e){}
+  }
+  if(!$("codeSheet").hidden) codeUpdateTiles();
+}
+setInterval(codeTick, 500);
+
+function codeUpdateTiles(){
+  const now = Date.now(), running = CODE.start && !CODE.end;
+  const tot = $("cTot"), cyc = $("cCyc"), epi = $("cEpi");
+  if(!tot) return;
+  tot.querySelector(".big").textContent = CODE.start ? mmss((CODE.end||now) - CODE.start) : "0:00";
+  tot.querySelector(".sm").textContent = CODE.start ? "Bắt đầu " + clock(CODE.start) + (CODE.end ? " · kết thúc " + clock(CODE.end) : "") : "Chưa bắt đầu";
+  // chu kỳ CPR
+  if(running && CODE.cyc){
+    const left = CYCLE_MS - (now - CODE.cyc);
+    cyc.querySelector(".big").textContent = left > 0 ? mmss(left) : "+" + mmss(-left);
+    cyc.querySelector(".sm").textContent = left > 0 ? "đến lần kiểm tra nhịp kế tiếp" : "KIỂM TRA NHỊP · ĐỔI NGƯỜI ÉP TIM";
+    cyc.className = "ctile" + (left <= 0 ? " alert" : left <= 15000 ? " amber" : "");
+  } else { cyc.querySelector(".big").textContent = "2:00"; cyc.querySelector(".sm").textContent = "chu kỳ ép tim"; cyc.className = "ctile"; }
+  // adrenalin
+  const le = lastOf("epi");
+  if(running && le){
+    const ago = now - le.t;
+    epi.querySelector(".big").textContent = mmss(ago);
+    epi.querySelector(".sm").textContent = ago >= 300000 ? "ĐÃ QUÁ 5 PHÚT — tiêm nhắc lại" : ago >= 180000 ? "Có thể nhắc lại (3–5 phút)" : "từ liều adrenalin gần nhất";
+    epi.className = "ctile" + (ago >= 300000 ? " alert" : ago >= 180000 ? " amber" : "");
+  } else { epi.querySelector(".big").textContent = "—"; epi.querySelector(".sm").textContent = "chưa tiêm adrenalin"; epi.className = "ctile"; }
+}
+
+function codeRender(){
+  const box = $("codeBox"), d = codeDoses(), running = CODE.start && !CODE.end;
+  const nEpi = CODE.log.filter(x=>x.k==="epi").length, nSh = CODE.log.filter(x=>x.k==="shock").length;
+  box.innerHTML = `<div class="codehead"><h3>Đồng hồ cấp cứu · ${sig(P.wt)} kg</h3><button type="button" class="cbtn" data-c="close">Thu nhỏ</button></div>
+   <div class="ctimers">
+     <div class="ctile full" id="cTot"><div class="lb">Tổng thời gian</div><div class="big">0:00</div><div class="sm"></div></div>
+     <div class="ctile" id="cCyc"><div class="lb">Chu kỳ CPR</div><div class="big">2:00</div><div class="sm"></div></div>
+     <div class="ctile" id="cEpi"><div class="lb">Adrenalin · ${nEpi} lần</div><div class="big">—</div><div class="sm"></div></div>
+   </div>
+   ${!CODE.start || CODE.end ? `<button type="button" class="cbtn pri" style="width:100%;margin-bottom:10px;min-height:54px;font-size:16px" data-c="start">▶ BẮT ĐẦU — ghi giờ ngừng tim / ép tim</button>` : ""}
+   <div class="cgrid">
+     <button type="button" class="cbtn dg" data-c="epi">💉 Adrenalin<small>${d.epi}</small></button>
+     <button type="button" class="cbtn warn" data-c="shock">⚡ Sốc điện · ${nSh}<small>${d.shock}</small></button>
+     <button type="button" class="cbtn" data-c="rhythm">🔁 Kiểm tra nhịp<small>bắt đầu chu kỳ 2 phút mới</small></button>
+     <button type="button" class="cbtn" data-c="amio">Amiodaron<small>${d.amio}</small></button>
+     <button type="button" class="cbtn" data-c="lido">Lidocain<small>${d.lido}</small></button>
+     <button type="button" class="cbtn" data-c="airway">Đường thở<small>đặt NKQ / mask thanh quản</small></button>
+     <button type="button" class="cbtn" data-c="other">✎ Ghi khác<small>thuốc, xét nghiệm, sự kiện</small></button>
+     <button type="button" class="cbtn" data-c="rosc" style="border-color:var(--ok);color:var(--ok)">✓ ROSC<small>có tuần hoàn trở lại</small></button>
+   </div>
+   <div class="clog">${CODE.log.length ? CODE.log.slice().reverse().map(x =>
+      `<div><span class="tm">${clock(x.t).slice(0,5)}</span><span class="el">${mmss(x.t - CODE.start)}</span><span>${x.x}</span></div>`).join("")
+      : `<div class="empty">Nhật ký trống. Bấm BẮT ĐẦU hoặc bất kỳ nút nào để bắt đầu ghi.</div>`}</div>
+   <div class="cfoot">
+     ${CODE.log.length > 1 ? `<button type="button" class="cbtn" data-c="undo">↶ Xoá dòng cuối</button>` : ""}
+     ${running ? `<button type="button" class="cbtn" data-c="stop">■ Kết thúc</button>` : ""}
+     ${CODE.log.length ? `<button type="button" class="cbtn" data-c="share">⇪ Xuất nhật ký</button><button type="button" class="cbtn" data-c="clear">Xoá hết</button>` : ""}
+   </div>
+   <div class="cnote">Liều trong nút tính theo cân nặng đang nhập (${sig(P.wt)} kg, ${P.ageY<14?"trẻ em — PALS":"người lớn — ACLS"}). Nhật ký lưu trên máy này, tải lại trang không mất. Màn hình được giữ sáng khi đang bấm giờ (nếu trình duyệt hỗ trợ).</div>`;
+  codeUpdateTiles(); codeTick();
+}
+function codeText(){
+  const lines = [`NHẬT KÝ CẤP CỨU — AnesDose`, `Cân nặng ${sig(P.wt)} kg · tuổi ${sig(P.ageY)}`,
+    `Bắt đầu ${new Date(CODE.start).toLocaleString("vi-VN")}${CODE.end?` · kết thúc ${clock(CODE.end)} (tổng ${mmss(CODE.end-CODE.start)})`:""}`, ""];
+  CODE.log.forEach(x => lines.push(`${clock(x.t)}  [+${mmss(x.t-CODE.start)}]  ${x.x}`));
+  return lines.join("\n");
+}
+$("codeFab").addEventListener("click", () => { $("codeSheet").hidden = false; codeRender(); });
+$("codeSheet").addEventListener("click", async e => {
+  if(e.target.id === "codeSheet"){ $("codeSheet").hidden = true; return; }
+  const b = e.target.closest("[data-c]"); if(!b) return;
+  const c = b.dataset.c, d = codeDoses();
+  if(c === "close"){ $("codeSheet").hidden = true; return; }
+  if(c === "start"){ CODE = {start:null,end:null,cyc:null,log:[]}; codeAdd(null); return; }
+  if(c === "epi") return codeAdd("epi", d.epi);
+  if(c === "shock") return codeAdd("shock", d.shock);
+  if(c === "amio") return codeAdd("amio", d.amio);
+  if(c === "lido") return codeAdd("lido", d.lido);
+  if(c === "rhythm") return codeAdd("rhythm", "Kiểm tra nhịp");
+  if(c === "airway") return codeAdd("airway", "Kiểm soát đường thở (NKQ/mask thanh quản)");
+  if(c === "rosc"){ codeAdd("rosc", "ROSC — có tuần hoàn trở lại"); return; }
+  if(c === "other"){ const t = prompt("Ghi chú (thuốc, liều, xét nghiệm, nhịp…):"); if(t && t.trim()) codeAdd("note", t.trim().replace(/</g,"&lt;")); return; }
+  if(c === "undo"){ CODE.log.pop(); const lc = [...CODE.log].reverse().find(x => x.k==="rhythm"||x.k==="shock"||x.k==="start"); CODE.cyc = lc ? lc.t : CODE.start; codeSave(); codeRender(); return; }
+  if(c === "stop"){ if(confirm("Kết thúc bấm giờ cấp cứu?")){ CODE.end = Date.now(); CODE.log.push({t:CODE.end,k:"end",x:"Kết thúc"}); codeSave(); codeWake(false); codeRender(); } return; }
+  if(c === "clear"){ if(confirm("Xoá toàn bộ nhật ký cấp cứu? Không khôi phục được.")){ CODE = {start:null,end:null,cyc:null,log:[]}; codeSave(); codeWake(false); codeRender(); } return; }
+  if(c === "share"){
+    const txt = codeText();
+    try{ if(navigator.share){ await navigator.share({title:"Nhật ký cấp cứu", text:txt}); return; } }catch(err){ if(err && err.name === "AbortError") return; }
+    try{ await navigator.clipboard.writeText(txt); alert("Đã sao chép nhật ký — dán vào Zalo, ghi chú hoặc hồ sơ."); }
+    catch(err){ prompt("Sao chép nhật ký:", txt); }
+  }
+});
+if(CODE.start && !CODE.end) codeWake(true);
 
 /* Nhớ bệnh nhân lần trước (chỉ trong 12 giờ, và luôn báo rõ là số cũ) */
 const PT_KEY = "anesdose.patient.v1", PT_TTL = 12*3600*1000;
