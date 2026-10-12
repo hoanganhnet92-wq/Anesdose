@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AnesDose — Tính nhanh liều thuốc gây mê</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#d0006d">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{
   --bg:#f6f7f9; --card:#ffffff; --ink:#12161c; --muted:#5d6b7a; --line:#e3e8ee;
@@ -284,6 +289,28 @@ nav.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-co
 .asres.warn{background:var(--warn-soft)} .asres.warn .rh{color:var(--warn)}
 .asres.danger{background:var(--danger-soft)} .asres.danger .rh{color:var(--danger)}
 
+/* Khôi phục bệnh nhân lần trước */
+.restore{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;padding:8px 11px;border-radius:10px;
+  background:var(--warn-soft);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);font-size:12.5px;line-height:1.35}
+.restore[hidden]{display:none}
+.restore button{margin-left:auto;min-height:34px;padding:5px 11px;border-radius:8px;border:1px solid var(--warn);
+  background:transparent;color:var(--warn);font:inherit;font-weight:700;font-size:12.5px}
+/* Tìm phác đồ */
+.evsearch{position:relative;margin-bottom:10px}
+.evsearch input{width:100%;box-sizing:border-box;min-height:46px;padding:10px 40px 10px 14px;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:15px}
+.evsearch input:focus{outline:2px solid var(--accent);outline-offset:0}
+.evsearch .clr{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:none;
+  background:transparent;color:var(--muted);font-size:18px;cursor:pointer}
+.evres{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-top:6px;overflow:hidden}
+.evres button{display:block;width:100%;text-align:left;padding:11px 14px;border:none;border-bottom:1px solid var(--line);
+  background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer;min-height:var(--tap)}
+.evres button:last-child{border-bottom:none}
+.evres button small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.evres .g{display:inline-block;font-size:10.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);
+  border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.evres .empty{padding:12px 14px;color:var(--muted);font-size:13px}
+
 /* Màn hình nằm ngang / màn hình thấp: chỉ giữ cố định hàng tab,
    phần nhập thông số bệnh nhân cuộn đi để lấy chỗ cho nội dung */
 @media (orientation:landscape) and (max-height:560px){
@@ -309,6 +336,7 @@ nav.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-co
       </div>
       <div class="field"><label>Giới</label><select id="sex"><option value="M">Nam</option><option value="F">Nữ</option></select></div>
     </div>
+    <div class="restore" id="ptRestore" hidden></div>
     <div class="derived" id="derived"></div>
     <nav class="tabs" id="tabs"></nav>
   </div>
@@ -1226,6 +1254,45 @@ function eventCard(ev){
   return h;
 }
 
+/* Tìm phác đồ — không phân biệt dấu tiếng Việt */
+const foldVN = t => " " + String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d")
+  .replace(/<[^>]+>/g," ").replace(/[^a-z0-9]+/g," ") + " ";
+let EV_INDEX = null;
+function evIndex(){
+  if(EV_INDEX) return EV_INDEX;
+  EV_INDEX = EVENTS.map(e => {
+    const title = foldVN((e.short||"")+" "+e.title);
+    const body = foldVN([e.definition, ...(e.signs||[]), ...(e.causes||[]),
+      ...(e.drugs||[]).map(d=>d.name), ...(e.tasks||[]).map(t=>t.task+" "+t.actions.join(" ")),
+      ...(e.triage ? e.triage.levels.flatMap(l=>l.items) : [])].join(" "));
+    return {e, title, body};
+  });
+  return EV_INDEX;
+}
+function searchEvents(q){
+  const terms = foldVN(q).split(/\s+/).filter(Boolean);
+  if(!terms.length) return [];
+  return evIndex().map(x => {
+    let sc = 0;
+    for(const t of terms){
+      const inT = x.title.includes(" "+t), inB = x.body.includes(" "+t);   // khớp đầu từ
+      if(!inT && !inB) return null;
+      sc += inT ? 10 : 1;
+    }
+    return {e:x.e, sc};
+  }).filter(Boolean).sort((a,b) => b.sc - a.sc).slice(0, 12).map(x => x.e);
+}
+function evSearchResults(q){
+  if(!q.trim()) return "";
+  const r = searchEvents(q);
+  if(!r.length) return `<div class="evres"><div class="empty">Không tìm thấy phác đồ nào cho “${q.replace(/</g,"&lt;")}”.</div></div>`;
+  return `<div class="evres">` + r.map(e => {
+    const g = EV_GROUPS.find(x => x.key === e.grp);
+    return `<button type="button" data-goev="${e.id}"><span class="g">${g?g.label:""}</span>${e.short||e.title}${e.short?`<small>${e.title}</small>`:""}</button>`;
+  }).join("") + `</div>`;
+}
+let EV_QUERY = "";
+
 let CUR_EVENT = "anaphylaxis";
 let CUR_GROUP = "anes";
 let PICKER_OPEN = true;
@@ -1238,6 +1305,9 @@ function renderEmergency(){
       : P.ageY < 14
       ? 'Bệnh nhân nhi: các dòng có nhãn <span class="tag">liều nhi</span> là liều mg/kg theo PALS/APLS do app quy đổi thêm, <b>không có trong sách gốc</b> (sách là bản người lớn).'
       : 'Kiểm tra lại nồng độ ống thuốc trước khi rút.'}</div>`;
+  h += `<div class="evsearch"><input id="evq" type="search" placeholder="Tìm phác đồ: hen, phản vệ, kali, adrenalin…" autocomplete="off" value="${EV_QUERY.replace(/"/g,"&quot;")}">
+      <button type="button" class="clr" id="evqClr" aria-label="Xoá" ${EV_QUERY?"":"hidden"}>✕</button>
+      <div id="evres">${evSearchResults(EV_QUERY)}</div></div>`;
   h += `<details class="pickwrap"${PICKER_OPEN?" open":""}>
       <summary><span class="pill">${EV_GROUPS.find(g=>g.key===ev.grp).label}</span> ${ev.short||ev.title}<span class="hint">chạm để đổi</span></summary>
       <div class="grpbar">` + EV_GROUPS.map(g =>
@@ -1249,6 +1319,15 @@ function renderEmergency(){
   h += eventCard(ev);
   $("p-emergency").innerHTML = h;
 
+  const q = $("evq");
+  q.addEventListener("input", () => { EV_QUERY = q.value; $("evres").innerHTML = evSearchResults(EV_QUERY); $("evqClr").hidden = !EV_QUERY; });
+  $("evqClr").addEventListener("click", () => { EV_QUERY = ""; q.value = ""; $("evres").innerHTML = ""; $("evqClr").hidden = true; q.focus(); });
+  $("evres").addEventListener("click", e => {
+    const b = e.target.closest("[data-goev]"); if(!b) return;
+    const ev2 = EVENTS.find(x => x.id === b.dataset.goev);
+    CUR_EVENT = ev2.id; CUR_GROUP = ev2.grp; EV_QUERY = ""; PICKER_OPEN = false;
+    renderEmergency(); $("p-emergency").scrollIntoView({block:"start"});
+  });
   const det = $("p-emergency").querySelector(".pickwrap");
   det.addEventListener("toggle", () => { PICKER_OPEN = det.open; });
   det.querySelector(".grpbar").addEventListener("click", e => {
@@ -3055,7 +3134,44 @@ window.goInfusion = function(){
   const el = $("p-emergency"); if(el) el.scrollIntoView({block:"start"});
 };
 
+/* Nhớ bệnh nhân lần trước (chỉ trong 12 giờ, và luôn báo rõ là số cũ) */
+const PT_KEY = "anesdose.patient.v1", PT_TTL = 12*3600*1000;
+const PT_DEFAULT = {wt:"60", ht:"165", age:"40", ageUnit:"y", sex:"M"};
+function savePatient(){
+  try{
+    const v = {wt:$("wt").value, ht:$("ht").value, age:$("age").value, ageUnit:$("ageUnit").value, sex:$("sex").value};
+    const same = Object.keys(PT_DEFAULT).every(k => v[k] === PT_DEFAULT[k]);
+    if(same) localStorage.removeItem(PT_KEY); else localStorage.setItem(PT_KEY, JSON.stringify({...v, t:Date.now()}));
+  }catch(e){}
+}
+function restorePatient(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem(PT_KEY) || "null"); }catch(e){}
+  if(!d || !d.t || Date.now() - d.t > PT_TTL) return;
+  ["wt","ht","age","ageUnit","sex"].forEach(k => { if(d[k] != null) $(k).value = d[k]; });
+  const t = new Date(d.t), hh = String(t.getHours()).padStart(2,"0"), mm = String(t.getMinutes()).padStart(2,"0");
+  const bar = $("ptRestore");
+  bar.innerHTML = `<span>⚠ Đang dùng thông số bệnh nhân <b>nhập lúc ${hh}:${mm}</b> — kiểm tra lại trước khi tính liều.</span>
+    <button type="button" id="ptReset">Bệnh nhân mới</button>`;
+  bar.hidden = false;
+  $("ptReset").addEventListener("click", () => {
+    Object.entries(PT_DEFAULT).forEach(([k,v]) => { $(k).value = v; });
+    try{ localStorage.removeItem(PT_KEY); }catch(e){}
+    bar.hidden = true; renderIfChanged(); $("wt").focus(); $("wt").select();
+  });
+}
+["wt","ht","age","ageUnit","sex"].forEach(id => $(id).addEventListener("input", () => {
+  savePatient(); const b = $("ptRestore"); if(b && !b.hidden && b.dataset.keep !== "1") b.hidden = true;
+}));
+["ageUnit","sex"].forEach(id => $(id).addEventListener("change", savePatient));
+restorePatient();
+
 buildTabs(); buildSubtabs(); renderAll();
+
+/* Chạy offline: service worker (chỉ khi mở qua http/https) */
+if("serviceWorker" in navigator && /^https?:/.test(location.protocol)){
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+}
 
 /* Xuất hàm để kiểm thử tự động */
 if(typeof module !== "undefined") module.exports = { IBW, LBW, AdjBW, W, P, readPatient };
