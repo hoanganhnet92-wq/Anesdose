@@ -1,7 +1,7 @@
 /* AnesDose — chạy offline.
    Trang chính: lấy bản mới từ mạng trước (để luôn cập nhật khi có mạng),
    mất mạng thì dùng bản đã lưu. Biểu tượng/manifest: dùng bản đã lưu. */
-const CACHE = "anesdose-v12";
+const CACHE = "anesdose-v13";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-192.png", "./icon-maskable-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
