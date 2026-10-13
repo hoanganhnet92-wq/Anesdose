@@ -28,6 +28,7 @@
   --t-local:#b230aa;     --t-local-soft:#fef1fc;
   --t-fluid:#0770ac;     --t-fluid-soft:#eff6ff;
   --t-abg:#6729ae;       --t-abg-soft:#f7f3fc;
+  --t-pocus:#b45309;     --t-pocus-soft:#fff4e5;
   /* 5 tab chính — sắc cách nhau đủ xa để phân biệt được ngay cạnh nhau */
   --t-anes:#5d59d8;      --t-anes-soft:#f6f3ff;
   --t-antico:#007965;    --t-antico-soft:#e7f9f3;
@@ -44,6 +45,7 @@
     --t-local:#f991ee;     --t-local-soft:#422f3f;
     --t-fluid:#74bbff;     --t-fluid-soft:#243649;
     --t-abg:#c99cfc;       --t-abg-soft:#322145;
+    --t-pocus:#f6ad55;     --t-pocus-soft:#3d2a12;
     --t-anes:#baabff;      --t-anes-soft:#363247;
     --t-antico:#06cdac;    --t-antico-soft:#1b3a32;}
 }
@@ -334,6 +336,16 @@ nav.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-co
 .pdfv .msg{color:#ccc;text-align:center;padding:30px 16px;font-size:14px}
 .pdfv .foot{display:flex;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#1d1f24}
 .pdfv .foot button{flex:1;min-height:46px;border-radius:10px;border:1px solid #444;background:#2a2d33;color:#fff;font:inherit;font-size:15px;font-weight:700}
+/* Tab POCUS */
+.pcfolder{display:block;text-align:center;min-height:var(--tap);line-height:var(--tap);margin:-2px 0 12px;border-radius:12px;
+  background:var(--accent-soft);color:var(--accent);font-weight:700;text-decoration:none;font-size:14px}
+.pcitem{display:flex;align-items:center;gap:11px;padding:11px 14px;border-top:1px solid var(--line);text-decoration:none;color:var(--ink);min-height:var(--tap)}
+.pcitem:active{background:var(--bg)}
+.pcn{flex:0 0 30px;height:30px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:13px;
+  display:flex;align-items:center;justify-content:center}
+.pct{flex:1;display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.35}
+.pct small{font-size:12px;color:var(--muted)}
+.pcgo{color:var(--muted);font-size:16px}
 /* Tìm phác đồ */
 .evsearch{position:relative;margin-bottom:10px}
 .evsearch input{width:100%;box-sizing:border-box;min-height:46px;padding:10px 40px 10px 14px;border-radius:12px;
@@ -448,6 +460,7 @@ main.wrap{padding-bottom:84px}
   <section class="panel" id="p-local"></section>
   <section class="panel" id="p-antico"></section>
   <section class="panel" id="p-abg"></section>
+  <section class="panel" id="p-pocus"></section>
 </main>
 
 <footer class="wrap">
@@ -3230,7 +3243,7 @@ function renderAntico(){
 const TABS = [
   ["p-emergency","Cấp cứu","emergency"],["p-anes","Gây mê","anes"],
   ["p-local","Tê vùng","local"],["p-antico","Chống đông","antico"],
-  ["p-abg","Khí máu","abg"]
+  ["p-abg","Khí máu","abg"],["p-pocus","POCUS","pocus"]
 ];
 /* Tab Gây mê chia thành các mục con */
 const SUBTABS = [
@@ -3268,11 +3281,42 @@ function buildTabs(){
   applyTabColor(TABS[0][2]);
 }
 
+const POCUS_FOLDER = "1bYiWpaMegrCXOhlyIYtHgfVtja-mVm1v";
+const POCUS = [{"g":"Quy trình tiếp cận","items":[{"t":"RUSH — hướng dẫn từng bước","n":1,"id":"1_mbKv5ErPJqJcbPEWrY65P6votzmusgo","d":"Sốc chưa rõ nguyên nhân: bơm (tim) – bình chứa (IVC, dịch tự do, phổi) – ống dẫn (ĐMC, TM sâu)","k":"soc tut ha rush"},{"t":"eFAST","n":5,"id":"1kWK1O9D-sw4eI3qRNndAvZ63c0rW1M1o","d":"Chấn thương: dịch ổ bụng, màng tim, tràn máu và tràn khí màng phổi","k":"chan thuong fast tran khi tran mau"},{"t":"Kiến thức cơ bản về máy siêu âm","n":2,"id":"1uTGJGCQkJ0aeMQGihaKIym5n5MFqmgJx","d":"Đầu dò, độ sâu, gain, các chế độ B / M / Doppler","k":"may dau do co ban knobology"}]},{"g":"Tim","items":[{"t":"Siêu âm tim có trọng điểm tại giường","n":3,"id":"1okm_mP2JTMaxGPIB0xuCy5S5rvrblwXZ","d":"Các mặt cắt cơ bản: cạnh ức trục dài/ngắn, 4 buồng mỏm, dưới sườn","k":"tim mat cat"},{"t":"Phân suất tống máu thất trái","n":12,"id":"1cIaohaUWp5D9H6jTdYcUGv548b85KsK3","d":"Đánh giá co bóp thất trái bằng mắt, EPSS, Simpson","k":"ef that trai co bop"},{"t":"Đo cung lượng tim đơn giản","n":13,"id":"14nlzu35bW0RQ1is3T_HWOnz5hDQvz1OS","d":"VTI đường ra thất trái × diện tích → thể tích nhát bóp, cung lượng tim; đáp ứng dịch","k":"cung luong vti dap ung dich"},{"t":"Rối loạn chức năng tâm trương","n":14,"id":"1ehHv9rdM89nB5eqrMW-30w_7ZpiB1Aa_","d":"Phân độ bằng E/A, e′, E/e′, nhĩ trái, hở ba lá","k":"tam truong e/e"},{"t":"D sign — tăng gánh thất phải","n":15,"id":"18ebV7a-kRForBLMuYOqk7QDFyNpCHuff","d":"Vách liên thất dẹt, thất trái hình chữ D: quá tải áp lực / thể tích thất phải","k":"d sign that phai thuyen tac phoi"},{"t":"Siêu âm thất phải","n":17,"id":"1NmXBAH7dl4cZI7fBFLlh2APPH83Tfp9Y","d":"Kích thước, TAPSE, S′, áp lực động mạch phổi","k":"that phai tapse thuyen tac phoi"}]},{"g":"Chèn ép tim","items":[{"t":"POCUS chèn ép tim","id":"18Nc1hCZaP-nlc9kQssHQTLBqZ-siFpxz","d":"Dịch màng tim, xẹp nhĩ/thất phải thì tâm trương, IVC giãn","k":"chen ep tim tran dich mang tim"},{"t":"Siêu âm POCUS chèn ép tim cấp","id":"1BEg3v5IsWDKm1rSiKQ9gOT5_h2p1YLqY","d":"Bài chi tiết, nhiều hình (file lớn ~55 MB)","k":"chen ep tim"},{"t":"RECAPEM — Chèn ép tim","id":"12_epsZtvXoUnzJaVxZEr32MOLmSj_pwS","d":"Tóm tắt dạng ca lâm sàng","k":"chen ep tim"},{"t":"Pericardial tamponade (PDF)","id":"1kvGHDP2O5c43sBlMKuTSGedAgFsCMBSY","d":"Bản gốc tiếng Anh","k":"tamponade chen ep tim"}]},{"g":"Phổi","items":[{"t":"Siêu âm phổi dễ dàng","id":"17Z1TOdvQ4w1a4X7cj85F_KP2nVLQWGGD","d":"Đường A/B, trượt màng phổi, điểm phổi, đông đặc, tràn dịch; BLUE","k":"phoi lus duong b tran khi tran dich blue"},{"t":"POCUS phổi cho bác sĩ gây mê — Hội nghị GMHS 09/2025","id":"1iS6PsAdmbQ_7yrE30FNZgLOegW3Pl5pO","d":"Bài trình bày hội nghị (được chia sẻ)","k":"phoi lus gay me hoi nghi"},{"t":"Video siêu âm phổi","id":"1qQo1YKEx5fUD-1RKI_6nSi0DA7K5dBUw","d":"Video ~1,7 GB — nên mở khi có wifi (được chia sẻ)","k":"phoi video"}]},{"g":"Dịch, tĩnh mạch, mạch máu","items":[{"t":"Thang điểm VExUS","n":16,"id":"19I75gINzigt9wEWegRiP0CsagtVP7IW0","d":"Sung huyết tĩnh mạch: IVC + Doppler TM gan, TM cửa, TM thận","k":"vexus sung huyet tinh mach ivc"},{"t":"Động mạch chủ có trọng điểm","n":7,"id":"1De71B_0i88rGq49CcMxbAqLZIqePR3m0","d":"Phình động mạch chủ bụng (≥ 3 cm), các mặt cắt dọc/ngang","k":"dong mach chu phinh"},{"t":"Huyết khối tĩnh mạch sâu chi dưới","n":8,"id":"1Y7Rc2wbOpA4j6-sOj4HK5zLChJKwGTjF","d":"Ép 2 điểm / 3 điểm: TM đùi chung, TM khoeo","k":"huyet khoi tinh mach sau dvt"}]},{"g":"Bụng, thận, bàng quang","items":[{"t":"Siêu âm bụng","n":6,"id":"1UywqisPEQoa_gw0bQ4_BRn7pY0oFqrqg","d":"Dịch tự do, gan mật, túi mật","k":"bung dich tu do gan mat"},{"t":"Thận có trọng điểm","n":9,"id":"1xesuzzmJlC83wW7woRmAANgVxy1FyzW1","d":"Ứ nước thận, sỏi, phân độ ứ nước","k":"than u nuoc"},{"t":"Bàng quang có trọng điểm","n":10,"id":"1dGAcQLdK-ngTL68DTCvgeySjORfiufXM","d":"Thể tích bàng quang, bí tiểu sau mổ/sau tê tuỷ","k":"bang quang bi tieu the tich"}]},{"g":"Thủ thuật dưới siêu âm","items":[{"t":"Lập đường truyền tĩnh mạch ngoại vi","n":18,"id":"1aeDxmv0HLbysDsocU617Z7b0UUh5rTYj","d":"Ven khó: chọn tĩnh mạch, kỹ thuật trục ngắn/dài","k":"duong truyen tinh mach ngoai vi ven kho"},{"t":"Đặt catheter tĩnh mạch trung tâm","n":19,"id":"1USYNzigx0IE0ICcBsQBXo0DPO-TS0Tqf","d":"TM cảnh trong, dưới đòn, đùi; xác nhận vị trí dây dẫn","k":"catheter tinh mach trung tam cvc"}]},{"g":"Sách tham khảo","items":[{"t":"Miller — Perioperative Echocardiography and POCUS (ch. 33)","id":"1vVLA5PKbwbase-O1f7Hy9bVAyF64JgIF","d":"Chương sách gây mê, siêu âm tim chu phẫu","k":"miller sach tim chu phau"},{"t":"Comprehensive Critical Care Ultrasound, 2e","id":"1YVaoalggXEvIhBkp-_5ELXUbGedJG6CR","d":"Sách siêu âm hồi sức (được chia sẻ)","k":"sach hoi suc"},{"t":"Practical Ultrasound in Anesthesia for Critical Care and Pain Management","id":"1x9z3VNifMkkU9q1ov9jG7EpUk_xafdkV","d":"Sách siêu âm trong gây mê – hồi sức – đau (được chia sẻ)","k":"sach gay me hoi suc dau"}]}];
+
+/* Tab POCUS — mục lục tài liệu trong Google Drive của người dùng, mở bằng trình xem Drive */
+let PC_Q = "";
+function renderPocus(){
+  const q = foldVN(PC_Q).trim().split(/\s+/).filter(Boolean);
+  const hit = it => !q.length || q.every(t => foldVN([it.t, it.d, it.k].join(" ")).includes(" " + t));
+  const off = navigator.onLine === false;
+  let h = `<div class="banner ${off ? "dg" : "warn"}">${off
+      ? "<b>Đang mất mạng</b> — tài liệu nằm trên Google Drive nên cần có mạng để mở."
+      : "Tài liệu mở bằng Google Drive của bạn — cần có mạng và đăng nhập đúng tài khoản. Người khác chỉ mở được file bạn đã chia sẻ."}</div>
+    <div class="evsearch"><input id="pcQ" type="search" placeholder="Tìm: phổi, chèn ép, IVC, thất phải, DVT…" autocomplete="off" value="${PC_Q.replace(/"/g,"&quot;")}"></div>
+    <a class="pcfolder" href="https://drive.google.com/drive/folders/${POCUS_FOLDER}" target="_blank" rel="noopener">📁 Mở cả thư mục Pocus trong Drive</a>`;
+  let any = false;
+  for(const grp of POCUS){
+    const its = grp.items.filter(hit); if(!its.length) continue; any = true;
+    h += `<div class="card"><h2>${grp.g}</h2>` + its.map(it => `
+      <a class="pcitem" href="https://drive.google.com/file/d/${it.id}/view" target="_blank" rel="noopener">
+        <span class="pcn">${it.n != null ? it.n : "•"}</span>
+        <span class="pct"><b>${it.t}</b><small>${it.d}</small></span><span class="pcgo">↗</span></a>`).join("") + `</div>`;
+  }
+  if(!any) h += `<div class="card"><div class="note">Không tìm thấy tài liệu phù hợp.</div></div>`;
+  h += `<div class="note" style="background:none;border:none;text-align:center">Số thứ tự theo tên file trong thư mục Pocus (không có bài 4 và 11).</div>`;
+  $("p-pocus").innerHTML = h;
+  const inp = $("pcQ");
+  inp.addEventListener("input", () => { const pos = inp.selectionStart; PC_Q = inp.value; renderPocus(); const i2 = $("pcQ"); i2.focus(); i2.setSelectionRange(pos, pos); });
+}
+window.addEventListener("online", () => { if($("p-pocus")) renderPocus(); });
+window.addEventListener("offline", () => { if($("p-pocus")) renderPocus(); });
+
 function renderAll(){
   readPatient();
   renderDerived(); renderInduction(); renderInfusion();
   renderLocal(); renderEmergency(); renderAirway(); renderFluid(); renderABG();
-  renderAssess(); renderAntico();
+  renderAssess(); renderAntico(); renderPocus();
   adjustSticky();
 }
 
