@@ -1358,6 +1358,30 @@ function infusionTableCard(ev){
   return h;
 }
 
+/* Bảng quy liều truyền MgSO₄ ra mL/h (mục #20) — tính theo cân nặng và nồng độ pha ví dụ */
+function mgInfusionCard(){
+  const w = P.wt;
+  const concs = [40, 80, 160];   // mg/mL ví dụ
+  // mỗi dòng: tên, liều, hàm trả về [lo,hi] mg/giờ
+  const lines = [
+    {n:"Xoắn đỉnh — duy trì khi tái phát", dose:"3–20 mg/phút",
+     lo:3*60, hi:20*60, perKg:false},
+    {n:"Rung nhĩ, phác đồ B (Moran, ICU)", dose:"25 mg/kg/giờ",
+     lo:25*w, hi:25*w, perKg:true}
+  ];
+  let h = `<div class="card"><h2>Quy ra tốc độ bơm mL/h — ${sig(w)} kg</h2>
+    <div class="scrollx"><table>
+    <tr><th>Truyền duy trì</th><th>Liều</th>${concs.map(c=>`<th class="n">${c} mg/mL</th>`).join("")}</tr>`;
+  for(const L of lines){
+    const perHrLo = L.lo, perHrHi = L.hi;
+    h += `<tr><td style="font-weight:650">${L.n}</td><td style="font-size:12.5px">${L.dose}${L.perKg?`<br><span class="mono" style="font-size:11px">= ${sig(perHrLo)} mg/giờ</span>`:""}</td>`
+       + concs.map(c=>`<td class="n hl">${rng(perHrLo/c, perHrHi/c, "")}</td>`).join("") + `</tr>`;
+  }
+  h += `</table></div>
+    <div class="note">Cột nồng độ là <b>ví dụ cách pha</b>: 40 mg/mL ≈ 2 g đủ 50 mL; 80 mg/mL ≈ 4 g đủ 50 mL; 160 mg/mL ≈ 8 g đủ 50 mL (MgSO₄ 15 % có sẵn 150 mg/mL). Số trong ô là <b>mL/giờ</b> cho ${sig(w)} kg. Khoa pha nồng độ khác thì tốc độ đổi theo — luôn kiểm tra lại nồng độ trước khi chạy bơm. Thời gian/pha loãng cụ thể chưa đối chiếu được toàn văn, cần khoa duyệt.</div></div>`;
+  return h;
+}
+
 /* Một sự kiện đầy đủ */
 /* Nhận định nhanh: chọn dấu hiệu → tự xếp mức độ nặng nhất */
 let TRI_SEL = {ev:null, sel:new Set()};
@@ -1419,6 +1443,7 @@ function eventCard(ev){
   }
   if(ev.id === "bronchospasm" || ev.id === "asthma-severe") h += salbutamolCard();
   if(ev.id === "asthma-vent") h += asthmaVentCard();
+  if(ev.id === "cv-mgso4") h += mgInfusionCard();
 
   if(ev.tasks && ev.tasks.length){
     h += `<div class="card"><h2>Các bước xử trí</h2>`;
