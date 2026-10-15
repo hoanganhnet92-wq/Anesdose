@@ -1554,9 +1554,190 @@ const ARR_DATA = {
        nxt:"Kháng trị thuốc → tạo nhịp qua tĩnh mạch tạm thời.",
        ci:[]}
     ]
+  },
+  sinus_tach: {
+    label:"Nhịp nhanh xoang", goal:"Điều trị nguyên nhân",
+    principle:"Nhịp nhanh xoang hầu như luôn là ĐÁP ỨNG với nguyên nhân nền (đau, thiếu dịch, chảy máu, sốt, thiếu máu, thiếu oxy, cường giáp, thuốc). Điều trị nguyên nhân trước; KHÔNG sốc điện, không thuốc chống loạn nhịp.",
+    electric:"Không có vai trò sốc điện.",
+    hypoNote:"Nhịp nhanh xoang là đáp ứng bù trừ — tìm và điều trị nguyên nhân gây tụt áp (chảy máu, thiếu dịch, sốc); KHÔNG làm chậm nhịp.",
+    link:"cv-tachycardia",
+    note:"Chỉ cân nhắc làm chậm nhịp khi đã loại trừ/điều trị nguyên nhân và nhịp nhanh đang gây hại (vd thiếu máu cơ tim).",
+    options:[
+      {n:"Điều trị nguyên nhân",
+       dose:"Bù dịch/máu, giảm đau, hạ sốt, oxy, điều trị thiếu máu, cường giáp… theo nguyên nhân.",
+       mon:"Nhịp tim và nguyên nhân nền.",
+       nxt:"Nhịp vẫn nhanh gây hại → cân nhắc chẹn beta.",
+       ci:[]},
+      {n:"Chẹn beta (khi cường giao cảm / thiếu máu cơ tim)",
+       dose:"Metoprolol 2,5–5 mg TM; esmolol truyền chuẩn độ.",
+       mon:"Nhịp tim, HA, co thắt phế quản.",
+       nxt:"Không kiểm soát → hội chẩn, tìm lại nguyên nhân.",
+       ci:["hypoBP","bronch","hf","avblock","sss"]}
+    ]
+  },
+  at_focal: {
+    label:"Nhịp nhanh nhĩ khu trú", goal:"Kiểm soát / cắt cơn",
+    principle:"Một ổ nhĩ phát nhịp nhanh. Adenosin có thể cắt một số nhưng thường chỉ làm lộ sóng P. Kiểm soát tần số bằng thuốc chẹn nút; amiodaron khi kháng trị.",
+    electric:"Chuyển nhịp đồng bộ 50–100 J nếu mất huyết động (một số ổ tự động không đáp ứng sốc).",
+    link:"cv-tachycardia",
+    options:[
+      {n:"Chẹn beta hoặc chẹn canxi non-DHP",
+       dose:"Metoprolol 2,5–5 mg TM / esmolol truyền; hoặc diltiazem 0,25 mg/kg TM / verapamil 2,5–5 mg TM.",
+       mon:"Nhịp tim, HA, co thắt phế quản, dấu suy tim.",
+       nxt:"Kháng trị → amiodaron; hội chẩn triệt đốt.",
+       ci:["hypoBP","avblock","sss"], cau:["bronch","hf","infant"]},
+      {n:"Adenosin (hỗ trợ chẩn đoán / cắt một số)",
+       dose:"6 mg → 12 mg TM nhanh, đẩy NaCl.",
+       mon:"ECG liên tục.",
+       nxt:"Thường chỉ làm chậm thoáng qua → chuyển kiểm soát tần số.",
+       ci:["bronch","avblock","sss"]},
+      {n:"Amiodaron (kháng trị)",
+       dose:"150 mg TM trong 10 phút rồi 1 mg/phút.",
+       mon:"HA, QT, nhịp tim.",
+       nxt:"Hội chẩn điện sinh lý / triệt đốt.",
+       ci:["iodine","avblock","sss"], cau:["qt"]}
+    ]
+  },
+  mat: {
+    label:"Nhịp nhanh nhĩ đa ổ (MAT)", goal:"Điều trị nền + kiểm soát tần số",
+    principle:"MAT (≥ 3 hình dạng sóng P) hay gặp ở bệnh phổi nặng/giảm oxy, hạ kali–magnesi. Điều trị bệnh nền và sửa điện giải là chính. SỐC ĐIỆN KHÔNG hiệu quả.",
+    electric:"Không sốc điện (không hiệu quả).",
+    hypoNote:"MAT thường do bệnh phổi/giảm oxy — tối ưu hô hấp và huyết động, sửa điện giải; sốc điện không hiệu quả.",
+    link:"cv-mgso4",
+    note:"Phần lớn bệnh nhân MAT có bệnh phổi — tránh hoặc rất thận trọng với chẹn beta.",
+    options:[
+      {n:"Sửa nguyên nhân + điện giải",
+       dose:"Oxy, điều trị bệnh phổi; bù kali ≥ 4,0 mmol/L và magnesi.",
+       mon:"SpO₂, khí máu, K⁺, Mg²⁺.",
+       nxt:"Còn nhanh → MgSO₄ hoặc chẹn canxi.",
+       ci:[]},
+      {n:"MgSO₄",
+       dose:"Bolus MgSO₄ (vd 2 g TM) có thể giảm tần số/chuyển nhịp kể cả khi Mg bình thường (vai trò hỗ trợ).",
+       mon:"HA, phản xạ gân xương, Mg máu.",
+       nxt:"Xem protocol MgSO₄ đầy đủ.",
+       ci:[], prefer:["hypoK"], link:"cv-mgso4"},
+      {n:"Chẹn canxi non-DHP (verapamil / diltiazem)",
+       dose:"Verapamil 2,5–5 mg TM; hoặc diltiazem 0,25 mg/kg TM.",
+       mon:"HA, nhịp tim.",
+       nxt:"Chưa đạt → chẹn beta nếu KHÔNG co thắt phế quản.",
+       ci:["hypoBP","avblock","hf","infant"]},
+      {n:"Chẹn beta (chỉ khi không co thắt phế quản)",
+       dose:"Metoprolol 2,5–5 mg TM; esmolol truyền.",
+       mon:"Nhịp tim, HA, co thắt phế quản.",
+       nxt:"Điều trị bệnh nền vẫn là chính.",
+       ci:["bronch","hypoBP","hf","avblock","sss"]}
+    ]
+  },
+  jet: {
+    label:"Nhịp nhanh bộ nối (JET)", goal:"Hạ nhiệt + kiểm soát",
+    principle:"JET hay gặp sau mổ tim trẻ em: nhịp bộ nối nhanh, phân ly nhĩ thất. Xử trí: giảm catecholamin, hạ thân nhiệt nhẹ, sửa điện giải, amiodaron; MgSO₄ dự phòng.",
+    electric:"Sốc điện thường không hiệu quả (ổ tự động); tạo nhịp nhĩ vượt tần số có thể hỗ trợ.",
+    hypoNote:"Mất huyết động trong JET: hỗ trợ huyết động, hạ nhiệt, amiodaron; sốc điện ít hiệu quả với ổ tự động.",
+    link:"cv-mgso4",
+    note:"JET sau mổ tim trẻ em — phối hợp hồi sức tim mạch nhi.",
+    options:[
+      {n:"Tối ưu nền + hạ thân nhiệt",
+       dose:"Giảm catecholamin/thuốc vận mạch nếu được; hạ thân nhiệt nhẹ 34–35 °C; bù kali và magnesi.",
+       mon:"Thân nhiệt, điện giải, huyết động.",
+       nxt:"Còn JET → amiodaron.",
+       ci:[]},
+      {n:"Amiodaron",
+       dose:"Trẻ em 5 mg/kg TM trong 20–60 phút rồi truyền; người lớn 150 mg TM trong 10 phút.",
+       mon:"HA, QT, nhịp tim.",
+       nxt:"Hội chẩn tim mạch nhi.",
+       ci:["iodine"], cau:["qt","hypoBP"]},
+      {n:"MgSO₄ (dự phòng/hỗ trợ sau mổ tim)",
+       dose:"Trẻ em 25–50 mg/kg TM khi làm ấm lại (tuần hoàn ngoài cơ thể).",
+       mon:"HA, Mg máu.",
+       nxt:"Xem protocol MgSO₄ đầy đủ.",
+       ci:[], link:"cv-mgso4"}
+    ]
+  },
+  pvc_nsvt: {
+    label:"Ngoại tâm thu thất / NSVT", goal:"Thường theo dõi",
+    principle:"PVC và nhịp nhanh thất không bền (NSVT) ở tim cấu trúc bình thường thường LÀNH TÍNH — theo dõi và sửa yếu tố thúc đẩy. Chỉ điều trị khi có triệu chứng/huyết động hoặc có bệnh tim nền.",
+    electric:"Không sốc điện cho PVC/NSVT đơn thuần; NSVT bền hoặc huyết động xấu → xử trí như VT.",
+    hypoNote:"Tụt áp hiếm do PVC/NSVT đơn thuần — tìm nguyên nhân khác; nếu thành VT bền/huyết động xấu → xử trí như VT (sốc điện).",
+    link:"cv-tachycardia",
+    options:[
+      {n:"Sửa yếu tố thúc đẩy",
+       dose:"Oxy, bù kali ≥ 4,0 và magnesi, giảm catecholamin, điều trị thiếu máu cơ tim.",
+       mon:"Điện giải, ECG, dấu thiếu máu cơ tim.",
+       nxt:"Triệu chứng dai dẳng → chẹn beta.",
+       ci:[]},
+      {n:"Chẹn beta (khi triệu chứng / thiếu máu cơ tim)",
+       dose:"Metoprolol 2,5–5 mg TM; esmolol truyền.",
+       mon:"Nhịp, HA, co thắt phế quản.",
+       nxt:"Kháng trị / bệnh tim nền → amiodaron, hội chẩn.",
+       ci:["hypoBP","bronch","hf","avblock","sss"]},
+      {n:"Amiodaron / Lidocain (NSVT triệu chứng, có bệnh tim)",
+       dose:"Amiodaron 150 mg TM/10 phút; hoặc lidocain 1–1,5 mg/kg (ưu tiên khi thiếu máu cơ tim).",
+       mon:"HA, QT; lidocain: dấu thần kinh.",
+       nxt:"Hội chẩn điện sinh lý.",
+       ci:["iodine","avblock"], cau:["qt","hepatic"]}
+    ]
+  },
+  vt_storm: {
+    label:"Bão điện thất (VT storm)", goal:"Dập cơn tái diễn",
+    principle:"≥ 3 cơn VT/VF trong 24 giờ. Nền tảng: CHẸN BETA (giảm giao cảm) + amiodaron, an thần sâu (± đặt NKQ), sửa điện giải/thiếu máu cơ tim; cân nhắc hỗ trợ tuần hoàn cơ học và triệt đốt.",
+    electric:"Khử rung/chuyển nhịp cho từng cơn theo nhịp; an thần sâu giúp giảm trương lực giao cảm.",
+    link:"cv-tachycardia",
+    note:"Bão điện thất cần hội chẩn tim mạch/điện sinh lý khẩn.",
+    options:[
+      {n:"Chẹn beta (nền tảng)",
+       dose:"Esmolol 500 mcg/kg nạp rồi 50–300 mcg/kg/phút; hoặc propranolol. Ưu tiên chẹn beta không chọn lọc trong bão điện.",
+       mon:"Nhịp, HA, co bóp cơ tim.",
+       nxt:"Phối hợp amiodaron; an thần sâu.",
+       ci:["hypoBP","bronch","avblock","sss"], cau:["hf"]},
+      {n:"Amiodaron",
+       dose:"150 mg TM trong 10 phút, lặp, rồi 1 mg/phút.",
+       mon:"HA, QT.",
+       nxt:"Phối hợp chẹn beta; hội chẩn.",
+       ci:["iodine","avblock","sss"], cau:["qt"]},
+      {n:"Lidocain (ưu tiên khi thiếu máu cơ tim)",
+       dose:"1–1,5 mg/kg TM rồi truyền 1–4 mg/phút.",
+       mon:"Dấu thần kinh, nhịp tim.",
+       nxt:"An thần sâu, hỗ trợ cơ học / triệt đốt cấp.",
+       ci:["avblock"], cau:["hepatic"]},
+      {n:"An thần sâu ± đặt nội khí quản",
+       dose:"Giảm trương lực giao cảm bằng an thần sâu (propofol/benzodiazepin); cân nhắc gây mê toàn thể.",
+       mon:"Huyết động, đường thở.",
+       nxt:"Hỗ trợ tuần hoàn cơ học, triệt đốt cấp.",
+       ci:[]}
+    ]
+  },
+  dig_tox: {
+    label:"Loạn nhịp do ngộ độc digoxin", goal:"Trung hoà + ổn định",
+    principle:"Digoxin gây nhiều loạn nhịp (nhịp nhanh nhĩ có block, nhịp bộ nối, loạn nhịp thất, block nhĩ thất). Điều trị đặc hiệu là KHÁNG THỂ Fab; sửa kali–magnesi; TRÁNH canxi tĩnh mạch; thận trọng khi sốc điện.",
+    electric:"Sốc điện có thể gây loạn nhịp thất khó trị — chỉ khi đe doạ tính mạng, dùng mức năng lượng thấp.",
+    hypoNote:"Ngộ độc digoxin: ưu tiên Digoxin-Fab và sửa điện giải; sốc điện chỉ khi đe doạ tính mạng, mức năng lượng thấp.",
+    link:"cv-hyperkalemia",
+    note:"TRÁNH canxi tĩnh mạch (nguy cơ 'stone heart'); hội chẩn trung tâm chống độc.",
+    options:[
+      {n:"Digoxin immune Fab (đặc hiệu)",
+       dose:"Theo tổng liều/nồng độ digoxin hoặc liều kinh nghiệm cấp cứu; dùng khi loạn nhịp đe doạ tính mạng hoặc tăng kali nặng.",
+       mon:"Kali, ECG, nồng độ digoxin (toàn phần tăng sau Fab là bình thường).",
+       nxt:"Hồi sức hỗ trợ; hội chẩn chống độc.",
+       ci:[]},
+      {n:"Sửa điện giải",
+       dose:"Điều chỉnh magnesi; xử trí kali theo mức — TRÁNH canxi TM khi tăng kali do digoxin.",
+       mon:"K⁺, Mg²⁺, ECG.",
+       nxt:"Loạn nhịp thất → lidocain/phenytoin.",
+       ci:[], prefer:["hypoK"]},
+      {n:"Lidocain hoặc Phenytoin (loạn nhịp thất)",
+       dose:"Lidocain 1–1,5 mg/kg TM; hoặc phenytoin cho loạn nhịp thất do digoxin.",
+       mon:"Dấu thần kinh, nhịp tim.",
+       nxt:"Điều trị gốc vẫn là Fab.",
+       ci:["avblock"], cau:["hepatic"]},
+      {n:"Atropin / tạo nhịp (nhịp chậm, block)",
+       dose:"Atropin 1 mg TM; tạo nhịp qua da nếu block có triệu chứng.",
+       mon:"Nhịp tim, HA.",
+       nxt:"Fab là điều trị gốc.",
+       ci:[], link:"cv-bradycardia"}
+    ]
   }
 };
-const ARR_ORDER = ["af","svt","vtmono","vtpoly","vf","brady"];
+const ARR_ORDER = ["sinus_tach","af","svt","at_focal","mat","jet","pvc_nsvt","vtmono","vtpoly","vt_storm","vf","brady","dig_tox"];
 
 function arrContraLabels(keys){
   return keys.filter(k => ARR_SEL.contra.has(k)).map(k => ARR_CLABEL[k]).join("; ");
@@ -1571,7 +1752,7 @@ function arrResult(){
 
   // Banner mất huyết động
   if(sel.has("hypoBP")){
-    h += `<div class="tri-res crit"><b class="lv">→ Mất huyết động</b>Điện trị liệu TRƯỚC, thuốc sau: ${r.electric}</div>`;
+    h += `<div class="tri-res crit"><b class="lv">→ Mất huyết động</b>${r.hypoNote || ('Điện trị liệu TRƯỚC, thuốc sau: '+r.electric)}</div>`;
   }
   // Override cứng (vd WPW kèm rung nhĩ): thay thế đề xuất hàng đầu bằng hướng xử trí
   let hard = false;
