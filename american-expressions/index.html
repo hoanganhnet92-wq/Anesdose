@@ -1,0 +1,488 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>American Expressions</title>
+<style>
+/* Layout: một thẻ lật lớn giữa trang, thanh tiến độ + bộ lọc phía trên, nút điều hướng phía dưới. Palette ấm (kem + xanh mòng két + cam đất). */
+:root{
+  --bg:#f4efe6; --surface:#fffdf8; --ink:#2b2622; --muted:#8a7f72;
+  --line:#e3dac9; --accent:#1f7a6d; --accent-soft:#d9ebe6;
+  --warm:#c8632f; --warm-soft:#f6e3d6; --good:#1f7a6d; --shadow:rgba(61,47,30,.14);
+  --disp:"Fraunces",Georgia,serif; --body:"Figtree",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1c1a17; --surface:#262320; --ink:#f0e9dc; --muted:#a79b89;
+  --line:#3a352e; --accent:#59c3b2; --accent-soft:#1f3b36;
+  --warm:#e08a52; --warm-soft:#3a2b20; --good:#59c3b2; --shadow:rgba(0,0,0,.4);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#1c1a17; --surface:#262320; --ink:#f0e9dc; --muted:#a79b89;
+  --line:#3a352e; --accent:#59c3b2; --accent-soft:#1f3b36;
+  --warm:#e08a52; --warm-soft:#3a2b20; --good:#59c3b2; --shadow:rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);
+  min-height:100%;display:flex;flex-direction:column;line-height:1.5;-webkit-tap-highlight-color:transparent}
+.wrap{width:100%;max-width:560px;margin:0 auto;flex:1;display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:18px 24px}
+
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.brand{font-family:var(--disp);font-weight:600;font-size:1.5rem;letter-spacing:-.01em}
+.brand span{color:var(--accent)}
+.theme-btn{background:var(--surface);border:1px solid var(--line);color:var(--ink);
+  width:40px;height:40px;border-radius:12px;font-size:1.1rem;cursor:pointer;flex:none}
+
+.stats{display:flex;gap:8px;margin-bottom:12px}
+.stat{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:10px 8px;text-align:center}
+.stat b{display:block;font-size:1.3rem;font-family:var(--disp);font-variant-numeric:tabular-nums}
+.stat small{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+.stat.learned b{color:var(--good)}
+
+.bar{height:7px;border-radius:99px;background:var(--line);overflow:hidden;margin-bottom:14px}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .35s ease;border-radius:99px}
+
+.controls{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
+.seg button{border:none;background:none;color:var(--muted);font-family:var(--body);font-size:.82rem;
+  padding:6px 11px;border-radius:8px;cursor:pointer;font-weight:600;white-space:nowrap}
+.seg button.on{background:var(--accent);color:#fff}
+:root[data-theme="dark"] .seg button.on,
+:root:not([data-theme="light"]) .seg button.on{color:#10201d}
+@media (prefers-color-scheme:light){.seg button.on{color:#fff}}
+
+.stage{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:300px;gap:16px}
+.counter{text-align:center;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums}
+
+.card{position:relative;width:100%;aspect-ratio:3/2;max-width:100%;cursor:pointer;
+  perspective:1400px;user-select:none}
+.inner{position:absolute;inset:0;transition:transform .5s cubic-bezier(.2,.7,.2,1);
+  transform-style:preserve-3d}
+.card.flip .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  background:var(--surface);border:1px solid var(--line);border-radius:22px;
+  box-shadow:0 10px 30px -14px var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:26px 22px;gap:12px}
+.face.back{transform:rotateY(180deg);background:var(--accent-soft);border-color:transparent}
+.tag{position:absolute;top:14px;left:16px;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--muted);font-weight:700}
+.badge{position:absolute;top:12px;right:14px;font-size:.66rem;font-weight:700;padding:3px 9px;
+  border-radius:99px;background:var(--good);color:#fff;letter-spacing:.03em}
+:root[data-theme="dark"] .badge,:root:not([data-theme="light"]) .badge{color:#10201d}
+@media (prefers-color-scheme:light){.badge{color:#fff}}
+.badge[hidden]{display:none!important}
+
+.term{font-family:var(--disp);font-weight:600;font-size:clamp(1.5rem,6.5vw,2.1rem);
+  line-height:1.15;text-wrap:balance}
+.ipa{color:var(--muted);font-size:1rem;letter-spacing:.01em}
+.ipa[hidden]{display:none!important}
+.mean{font-family:var(--disp);font-weight:500;font-size:clamp(1.25rem,5.5vw,1.7rem);
+  line-height:1.25;text-wrap:balance;color:var(--ink)}
+.ex{font-size:.95rem;color:var(--muted);font-style:italic;max-width:42ch;line-height:1.45}
+.ex b{color:var(--warm);font-style:normal;font-weight:600}
+.hint{color:var(--muted);font-size:.8rem;opacity:.8}
+.speak{position:absolute;bottom:12px;right:14px;background:none;border:1px solid var(--line);
+  color:var(--accent);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center}
+.speak:active{transform:scale(.92)}
+
+.actions{display:flex;gap:10px}
+.actions button{flex:1;border:none;border-radius:14px;padding:14px;font-family:var(--body);
+  font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:7px;transition:transform .08s}
+.actions button:active{transform:scale(.97)}
+.no{background:var(--warm-soft);color:var(--warm)}
+.yes{background:var(--good);color:#fff}
+:root[data-theme="dark"] .yes,:root:not([data-theme="light"]) .yes{color:#10201d}
+@media (prefers-color-scheme:light){.yes{color:#fff}}
+
+.nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nav button{background:var(--surface);border:1px solid var(--line);color:var(--ink);
+  border-radius:12px;padding:10px 16px;font-family:var(--body);font-weight:600;cursor:pointer;font-size:.88rem}
+.nav button:disabled{opacity:.4;cursor:default}
+
+.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:1rem}
+.empty b{display:block;font-family:var(--disp);font-size:1.3rem;color:var(--ink);margin-bottom:6px}
+
+.foot{text-align:center;color:var(--muted);font-size:.74rem;margin-top:18px;line-height:1.6}
+.foot button{background:none;border:none;color:var(--warm);font-size:.74rem;cursor:pointer;
+  text-decoration:underline;font-family:var(--body)}
+.kbd{display:none}
+@media(min-width:620px){.kbd{display:block}}
+button:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.inner{transition:none}.bar>i{transition:none}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;600;700&display=swap">
+
+<div class="wrap">
+  <header>
+    <div class="brand"><span>American</span> Expressions</div>
+    <button class="theme-btn" id="theme" aria-label="Đổi giao diện sáng/tối">☾</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><b id="s-total">100</b><small>Tổng</small></div>
+    <div class="stat"><b id="s-remain">100</b><small>Chưa học</small></div>
+    <div class="stat learned"><b id="s-learned">0</b><small>Đã nhớ</small></div>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+
+  <div class="controls">
+    <div class="seg" id="filter">
+      <button data-f="all" class="on">Tất cả</button>
+      <button data-f="new">Chưa học</button>
+      <button data-f="learned">Đã nhớ</button>
+    </div>
+    <div class="seg" id="side">
+      <button data-s="front" class="on">Cụm → Nghĩa</button>
+      <button data-s="back">Nghĩa → Cụm</button>
+    </div>
+    <div class="seg" id="opts">
+      <button data-o="ipa" class="on">IPA</button>
+      <button data-o="shuffle">Trộn</button>
+    </div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="nav" id="nav">
+    <button id="prev">← Trước</button>
+    <span class="counter" id="counter">–</span>
+    <button id="next">Sau →</button>
+  </div>
+
+  <div class="foot">
+    100 cụm từ tiếng Anh Mỹ thông dụng · Chạm thẻ để lật · 🔊 phát âm (máy không đọc được sẽ mở trang nghe online)
+    <span class="kbd"><br>Space: lật · 1/←: chưa nhớ · 2/→: nhớ rồi</span>
+    <br><button id="reset">Đặt lại tiến độ</button>
+  </div>
+</div>
+
+<script>
+// 100 common American English expressions — Vietnamese meaning, IPA, example
+const CARDS = [
+{e:"break the ice",ipa:"/breɪk ðə aɪs/",m:"phá vỡ sự ngại ngùng, bắt chuyện cho đỡ gượng",ex:"He told a joke to break the ice at the meeting."},
+{e:"piece of cake",ipa:"/piːs əv keɪk/",m:"chuyện dễ như trở bàn tay",ex:"The exam was a piece of cake."},
+{e:"hit the sack",ipa:"/hɪt ðə sæk/",m:"đi ngủ",ex:"I'm exhausted, I'm going to hit the sack."},
+{e:"under the weather",ipa:"/ˈʌndər ðə ˈwɛðər/",m:"thấy hơi mệt, không khỏe trong người",ex:"She's feeling a bit under the weather today."},
+{e:"call it a day",ipa:"/kɔːl ɪt ə deɪ/",m:"dừng công việc, nghỉ cho hôm nay",ex:"We've done enough, let's call it a day."},
+{e:"on the same page",ipa:"/ɒn ðə seɪm peɪdʒ/",m:"cùng hiểu, cùng thống nhất quan điểm",ex:"Let's make sure we're on the same page before we start."},
+{e:"cut corners",ipa:"/kʌt ˈkɔːrnərz/",m:"làm ẩu, làm tắt để tiết kiệm công sức/tiền",ex:"Don't cut corners on safety."},
+{e:"hang in there",ipa:"/hæŋ ɪn ðɛr/",m:"cố lên, ráng chịu đựng",ex:"Hang in there, things will get better."},
+{e:"hit the road",ipa:"/hɪt ðə roʊd/",m:"lên đường, bắt đầu đi",ex:"It's getting late, we should hit the road."},
+{e:"a blessing in disguise",ipa:"/ə ˈblɛsɪŋ ɪn dɪsˈɡaɪz/",m:"trong cái rủi có cái may",ex:"Losing that job was a blessing in disguise."},
+{e:"beat around the bush",ipa:"/biːt əˈraʊnd ðə bʊʃ/",m:"nói vòng vo, không vào thẳng vấn đề",ex:"Stop beating around the bush and tell me."},
+{e:"bite the bullet",ipa:"/baɪt ðə ˈbʊlɪt/",m:"cắn răng chịu đựng, làm việc khó",ex:"I hate the dentist but I'll bite the bullet."},
+{e:"the ball is in your court",ipa:"/ðə bɔːl ɪz ɪn jɔːr kɔːrt/",m:"giờ đến lượt bạn quyết định",ex:"I've done my part, the ball is in your court now."},
+{e:"get the hang of it",ipa:"/ɡɛt ðə hæŋ əv ɪt/",m:"quen tay, nắm được cách làm",ex:"Driving is hard at first, but you'll get the hang of it."},
+{e:"go the extra mile",ipa:"/ɡoʊ ðə ˈɛkstrə maɪl/",m:"nỗ lực hơn mức bình thường",ex:"She always goes the extra mile for her patients."},
+{e:"in the same boat",ipa:"/ɪn ðə seɪm boʊt/",m:"cùng cảnh ngộ",ex:"We're all in the same boat here."},
+{e:"let the cat out of the bag",ipa:"/lɛt ðə kæt aʊt əv ðə bæɡ/",m:"lỡ miệng làm lộ bí mật",ex:"He let the cat out of the bag about the surprise party."},
+{e:"once in a blue moon",ipa:"/wʌns ɪn ə bluː muːn/",m:"rất hiếm khi, họa hoằn",ex:"We only see each other once in a blue moon."},
+{e:"pull someone's leg",ipa:"/pʊl ˈsʌmwʌnz lɛɡ/",m:"trêu chọc, đùa ai đó",ex:"Relax, I'm just pulling your leg."},
+{e:"speak of the devil",ipa:"/spiːk əv ðə ˈdɛvəl/",m:"vừa nhắc đã thấy xuất hiện",ex:"Speak of the devil — here she comes."},
+{e:"spill the beans",ipa:"/spɪl ðə biːnz/",m:"khai ra, tiết lộ",ex:"Come on, spill the beans!"},
+{e:"take it easy",ipa:"/teɪk ɪt ˈiːzi/",m:"thư giãn, bình tĩnh, nghỉ ngơi",ex:"You've worked hard, take it easy this weekend."},
+{e:"the last straw",ipa:"/ðə læst strɔː/",m:"giọt nước tràn ly",ex:"His rudeness was the last straw."},
+{e:"up in the air",ipa:"/ʌp ɪn ðə ɛr/",m:"còn chưa chắc chắn, chưa ngã ngũ",ex:"Our vacation plans are still up in the air."},
+{e:"when pigs fly",ipa:"/wɛn pɪɡz flaɪ/",m:"chuyện không bao giờ xảy ra",ex:"He'll apologize when pigs fly."},
+{e:"cost an arm and a leg",ipa:"/kɔːst ən ɑːrm ænd ə lɛɡ/",m:"đắt cắt cổ",ex:"That car cost an arm and a leg."},
+{e:"back to the drawing board",ipa:"/bæk tə ðə ˈdrɔːɪŋ bɔːrd/",m:"làm lại từ đầu",ex:"The plan failed, so it's back to the drawing board."},
+{e:"burn the midnight oil",ipa:"/bɜːrn ðə ˈmɪdnaɪt ɔɪl/",m:"thức khuya làm việc/học",ex:"She burned the midnight oil to finish the report."},
+{e:"keep an eye on",ipa:"/kiːp ən aɪ ɒn/",m:"để mắt, trông chừng",ex:"Can you keep an eye on my bag?"},
+{e:"out of the blue",ipa:"/aʊt əv ðə bluː/",m:"bất ngờ, không báo trước",ex:"She called me out of the blue."},
+{e:"a dime a dozen",ipa:"/ə daɪm ə ˈdʌzən/",m:"nhiều vô kể, chẳng có gì đặc biệt",ex:"Cheap souvenirs are a dime a dozen here."},
+{e:"add insult to injury",ipa:"/æd ˈɪnsʌlt tu ˈɪndʒəri/",m:"đã khổ còn khổ thêm",ex:"To add insult to injury, they charged me a fee."},
+{e:"barking up the wrong tree",ipa:"/ˈbɑːrkɪŋ ʌp ðə rɒŋ triː/",m:"nhầm đối tượng, đổ lỗi sai chỗ",ex:"If you think I did it, you're barking up the wrong tree."},
+{e:"the best of both worlds",ipa:"/ðə bɛst əv boʊθ wɜːrldz/",m:"được cả hai điều tốt",ex:"Working from home gives you the best of both worlds."},
+{e:"cry over spilled milk",ipa:"/kraɪ ˈoʊvər spɪld mɪlk/",m:"tiếc nuối chuyện đã rồi",ex:"It's done — no use crying over spilled milk."},
+{e:"get out of hand",ipa:"/ɡɛt aʊt əv hænd/",m:"vượt tầm kiểm soát",ex:"The party got out of hand."},
+{e:"give the benefit of the doubt",ipa:"/ɡɪv ðə ˈbɛnɪfɪt əv ðə daʊt/",m:"tin tưởng cho qua khi chưa chắc",ex:"I'll give him the benefit of the doubt this time."},
+{e:"hit the nail on the head",ipa:"/hɪt ðə neɪl ɒn ðə hɛd/",m:"nói trúng phóc, đúng vấn đề",ex:"You hit the nail on the head with that comment."},
+{e:"jump on the bandwagon",ipa:"/dʒʌmp ɒn ðə ˈbændwæɡən/",m:"chạy theo trào lưu",ex:"Everyone's jumping on the bandwagon."},
+{e:"keep your chin up",ipa:"/kiːp jɔːr tʃɪn ʌp/",m:"giữ vững tinh thần, đừng nản",ex:"Keep your chin up, you'll pass next time."},
+{e:"miss the boat",ipa:"/mɪs ðə boʊt/",m:"lỡ cơ hội",ex:"If you don't apply now, you'll miss the boat."},
+{e:"no pain, no gain",ipa:"/noʊ peɪn noʊ ɡeɪn/",m:"không khổ luyện thì không thành công",ex:"Training is tough, but no pain, no gain."},
+{e:"on the ball",ipa:"/ɒn ðə bɔːl/",m:"nhanh nhạy, làm việc tốt",ex:"The new assistant is really on the ball."},
+{e:"play it by ear",ipa:"/pleɪ ɪt baɪ ɪr/",m:"tùy cơ ứng biến, không lên kế hoạch cứng",ex:"We don't have a plan — let's play it by ear."},
+{e:"pull yourself together",ipa:"/pʊl jɔːrˈsɛlf təˈɡɛðər/",m:"trấn tĩnh lại, lấy lại bình tĩnh",ex:"Pull yourself together, it's going to be fine."},
+{e:"rings a bell",ipa:"/rɪŋz ə bɛl/",m:"nghe quen quen, thấy hơi nhớ",ex:"That name rings a bell."},
+{e:"sit on the fence",ipa:"/sɪt ɒn ðə fɛns/",m:"lưỡng lự, chưa chọn bên nào",ex:"Stop sitting on the fence and decide."},
+{e:"take with a grain of salt",ipa:"/teɪk wɪð ə ɡreɪn əv sɔːlt/",m:"nghe rồi dè chừng, đừng tin hết",ex:"Take his advice with a grain of salt."},
+{e:"the tip of the iceberg",ipa:"/ðə tɪp əv ðə ˈaɪsbɜːrɡ/",m:"chỉ là bề nổi của vấn đề",ex:"These complaints are just the tip of the iceberg."},
+{e:"throw in the towel",ipa:"/θroʊ ɪn ðə ˈtaʊəl/",m:"bỏ cuộc, đầu hàng",ex:"Don't throw in the towel yet."},
+{e:"twist someone's arm",ipa:"/twɪst ˈsʌmwʌnz ɑːrm/",m:"ép, thuyết phục ai làm gì",ex:"Okay, you twisted my arm — I'll come."},
+{e:"under your nose",ipa:"/ˈʌndər jɔːr noʊz/",m:"ngay trước mắt mà không thấy",ex:"The keys were right under your nose."},
+{e:"wrap your head around",ipa:"/ræp jɔːr hɛd əˈraʊnd/",m:"hiểu thấu, nắm được điều khó",ex:"I can't wrap my head around this math."},
+{e:"your guess is as good as mine",ipa:"/jɔːr ɡɛs ɪz æz ɡʊd æz maɪn/",m:"tôi cũng chịu, không biết hơn gì bạn",ex:"Where did he go? Your guess is as good as mine."},
+{e:"a ballpark figure",ipa:"/ə ˈbɔːlpɑːrk ˈfɪɡjər/",m:"con số ước chừng",ex:"Give me a ballpark figure for the cost."},
+{e:"back someone up",ipa:"/bæk ˈsʌmwʌn ʌp/",m:"ủng hộ, hỗ trợ ai",ex:"Don't worry, I'll back you up."},
+{e:"call it quits",ipa:"/kɔːl ɪt kwɪts/",m:"dừng lại, chấm dứt",ex:"After 20 years, she called it quits."},
+{e:"down to earth",ipa:"/daʊn tə ɜːrθ/",m:"giản dị, thực tế, dễ gần",ex:"Despite his fame, he's very down to earth."},
+{e:"drive someone up the wall",ipa:"/draɪv ˈsʌmwʌn ʌp ðə wɔːl/",m:"làm ai phát điên",ex:"That noise is driving me up the wall."},
+{e:"face the music",ipa:"/feɪs ðə ˈmjuːzɪk/",m:"đối mặt hậu quả",ex:"He has to face the music for his mistake."},
+{e:"get cold feet",ipa:"/ɡɛt koʊld fiːt/",m:"chùn bước, nhát vào phút chót",ex:"He got cold feet before the wedding."},
+{e:"go with the flow",ipa:"/ɡoʊ wɪð ðə floʊ/",m:"thuận theo hoàn cảnh",ex:"Just relax and go with the flow."},
+{e:"hands down",ipa:"/hændz daʊn/",m:"rõ ràng, chắc chắn nhất",ex:"This is hands down the best pizza here."},
+{e:"in a nutshell",ipa:"/ɪn ə ˈnʌtʃɛl/",m:"tóm lại, nói ngắn gọn",ex:"In a nutshell, we need more time."},
+{e:"keep in touch",ipa:"/kiːp ɪn tʌtʃ/",m:"giữ liên lạc",ex:"Let's keep in touch after graduation."},
+{e:"know the ropes",ipa:"/noʊ ðə roʊps/",m:"rành việc, thạo cách làm",ex:"Ask Jane — she knows the ropes."},
+{e:"make ends meet",ipa:"/meɪk ɛndz miːt/",m:"kiếm đủ sống, cân đối chi tiêu",ex:"It's hard to make ends meet on one salary."},
+{e:"off the top of my head",ipa:"/ɔːf ðə tɒp əv maɪ hɛd/",m:"nghĩ ngay ra mà chưa tra cứu",ex:"Off the top of my head, I'd say about fifty."},
+{e:"on second thought",ipa:"/ɒn ˈsɛkənd θɔːt/",m:"nghĩ lại thì",ex:"On second thought, let's stay home."},
+{e:"out of the question",ipa:"/aʊt əv ðə ˈkwɛstʃən/",m:"không thể được, loại trừ hẳn",ex:"Quitting now is out of the question."},
+{e:"pay attention",ipa:"/peɪ əˈtɛnʃən/",m:"chú ý, tập trung",ex:"Pay attention to the instructions."},
+{e:"pull strings",ipa:"/pʊl strɪŋz/",m:"nhờ quan hệ để lo việc",ex:"He pulled some strings to get the job."},
+{e:"read between the lines",ipa:"/riːd bɪˈtwiːn ðə laɪnz/",m:"hiểu ý ẩn sau lời nói",ex:"Read between the lines of her email."},
+{e:"ring a bell",ipa:"/rɪŋ ə bɛl/",m:"gợi nhớ, nghe quen",ex:"Does the name John ring a bell?"},
+{e:"see eye to eye",ipa:"/siː aɪ tə aɪ/",m:"đồng quan điểm",ex:"We don't always see eye to eye."},
+{e:"so far so good",ipa:"/soʊ fɑːr soʊ ɡʊd/",m:"đến giờ vẫn ổn",ex:"How's the project? So far so good."},
+{e:"take a rain check",ipa:"/teɪk ə reɪn tʃɛk/",m:"hẹn dịp khác",ex:"I can't tonight, can I take a rain check?"},
+{e:"the bottom line",ipa:"/ðə ˈbɒtəm laɪn/",m:"điểm mấu chốt, kết luận cuối",ex:"The bottom line is we need to save money."},
+{e:"think outside the box",ipa:"/θɪŋk ˌaʊtˈsaɪd ðə bɒks/",m:"nghĩ sáng tạo, phá khuôn",ex:"We need to think outside the box."},
+{e:"to make a long story short",ipa:"/tə meɪk ə lɒŋ ˈstɔːri ʃɔːrt/",m:"nói ngắn gọn thì",ex:"To make a long story short, we won."},
+{e:"turn a blind eye",ipa:"/tɜːrn ə blaɪnd aɪ/",m:"làm ngơ, lờ đi",ex:"The manager turned a blind eye to the issue."},
+{e:"under control",ipa:"/ˈʌndər kənˈtroʊl/",m:"trong tầm kiểm soát",ex:"Don't worry, everything is under control."},
+{e:"up to you",ipa:"/ʌp tə juː/",m:"tùy bạn quyết",ex:"Where should we eat? It's up to you."},
+{e:"wear many hats",ipa:"/wɛr ˈmɛni hæts/",m:"kiêm nhiều vai trò",ex:"In a startup, you wear many hats."},
+{e:"a win-win situation",ipa:"/ə wɪn wɪn ˌsɪtʃuˈeɪʃən/",m:"đôi bên cùng có lợi",ex:"This deal is a win-win situation."},
+{e:"all ears",ipa:"/ɔːl ɪrz/",m:"sẵn sàng lắng nghe",ex:"Tell me what happened, I'm all ears."},
+{e:"around the clock",ipa:"/əˈraʊnd ðə klɒk/",m:"suốt ngày đêm, không nghỉ",ex:"The team worked around the clock."},
+{e:"at the drop of a hat",ipa:"/æt ðə drɒp əv ə hæt/",m:"ngay lập tức, không do dự",ex:"She'll help you at the drop of a hat."},
+{e:"by the book",ipa:"/baɪ ðə bʊk/",m:"làm đúng quy tắc, đúng luật",ex:"The nurse did everything by the book."},
+{e:"cut to the chase",ipa:"/kʌt tə ðə tʃeɪs/",m:"vào thẳng vấn đề chính",ex:"Let's cut to the chase — what do you want?"},
+{e:"get the ball rolling",ipa:"/ɡɛt ðə bɔːl ˈroʊlɪŋ/",m:"khởi động, bắt đầu việc",ex:"Let's get the ball rolling on this project."},
+{e:"give it a shot",ipa:"/ɡɪv ɪt ə ʃɒt/",m:"thử xem sao",ex:"I've never cooked this, but I'll give it a shot."},
+{e:"in the long run",ipa:"/ɪn ðə lɒŋ rʌn/",m:"về lâu dài",ex:"Saving money pays off in the long run."},
+{e:"keep your fingers crossed",ipa:"/kiːp jɔːr ˈfɪŋɡərz krɒst/",m:"cầu may, hy vọng điều tốt",ex:"Keep your fingers crossed for my interview."},
+{e:"let's face it",ipa:"/lɛts feɪs ɪt/",m:"phải thừa nhận rằng",ex:"Let's face it, we're not going to win."},
+{e:"make up your mind",ipa:"/meɪk ʌp jɔːr maɪnd/",m:"quyết định dứt khoát",ex:"Make up your mind — yes or no?"},
+{e:"no big deal",ipa:"/noʊ bɪɡ diːl/",m:"không có gì to tát",ex:"It's no big deal, don't worry."},
+{e:"on the fence",ipa:"/ɒn ðə fɛns/",m:"còn phân vân",ex:"I'm on the fence about buying it."},
+{e:"out of the loop",ipa:"/aʊt əv ðə luːp/",m:"không được cập nhật thông tin",ex:"I've been out of the loop since vacation."},
+{e:"put it off",ipa:"/pʊt ɪt ɔːf/",m:"hoãn lại, trì hoãn",ex:"Don't put off the deadline."},
+{e:"take for granted",ipa:"/teɪk fɔːr ˈɡræntɪd/",m:"coi là đương nhiên, không trân trọng",ex:"We take clean water for granted."},
+{e:"the icing on the cake",ipa:"/ðə ˈaɪsɪŋ ɒn ðə keɪk/",m:"điều tuyệt vời bổ sung thêm",ex:"Winning the award was the icing on the cake."},
+];
+
+</script>
+<script>
+(function(){
+  var KEY="amexpr_learned_v1";
+  var learned={}; // index -> true
+  try{learned=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){learned={};}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(learned));}catch(e){}}
+
+  var state={filter:"all",side:"front",ipa:true,shuffle:false,order:[],pos:0,flipped:false};
+
+  var stage=document.getElementById('stage');
+  var counter=document.getElementById('counter');
+  var bar=document.getElementById('bar');
+
+  function baseOrder(){var a=[];for(var i=0;i<CARDS.length;i++)a.push(i);return a;}
+  function shuffled(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+  function buildOrder(){
+    var all=state.shuffle?shuffled(baseOrder()):baseOrder();
+    state.order=all.filter(function(i){
+      if(state.filter==="learned")return !!learned[i];
+      if(state.filter==="new")return !learned[i];
+      return true;
+    });
+    if(state.pos>=state.order.length)state.pos=Math.max(0,state.order.length-1);
+  }
+
+  function esc(s){return s.replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function exHTML(card){
+    // bôi đậm cụm từ trong ví dụ (không phân biệt hoa thường, dạng cơ bản)
+    var ex=esc(card.ex);var e=card.e.split(" ")[0];
+    try{var re=new RegExp("("+e.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+"[\\w' ]*)","i");ex=ex.replace(re,"<b>$1</b>");}catch(_){}
+    return ex;
+  }
+
+  function ttsAvailable(){return ('speechSynthesis'in window)&&('SpeechSynthesisUtterance'in window);}
+  function fallbackListen(text){
+    // Mở trang nghe người bản xứ phát âm khi giọng máy không phát được
+    try{window.open("https://youglish.com/pronounce/"+encodeURIComponent(text)+"/english/us","_blank","noopener");}catch(e){}
+  }
+  function doSpeak(text,btn){
+    if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();
+    try{speechSynthesis.resume();}catch(e){}
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang="en-US";u.rate=.9;
+    var vs=speechSynthesis.getVoices()||[];
+    var v=vs.filter(function(x){return /en[-_]US/i.test(x.lang);})[0]||vs.filter(function(x){return /^en/i.test(x.lang);})[0];
+    if(v)u.voice=v;
+    var started=false;
+    u.onstart=function(){started=true;if(btn)btn.textContent="🔈";};
+    u.onend=function(){if(btn)btn.textContent="🔊";};
+    u.onerror=function(){if(btn)btn.textContent="🔊";fallbackListen(text);};
+    speechSynthesis.speak(u);
+    // Nếu sau 1.5s vẫn im (môi trường chặn giọng máy) → mở trang nghe online
+    setTimeout(function(){
+      if(!started&&!speechSynthesis.speaking){if(btn)btn.textContent="🔊";fallbackListen(text);}
+    },1500);
+  }
+  function speak(text,btn){
+    if(!ttsAvailable()){fallbackListen(text);return;}
+    try{
+      var vs=speechSynthesis.getVoices()||[];
+      if(!vs.length){
+        // Giọng chưa tải xong — đợi rồi đọc, kèm hạn chót phòng khi không bao giờ tải
+        var done=false;
+        var once=function(){if(done)return;done=true;doSpeak(text,btn);};
+        speechSynthesis.onvoiceschanged=once;
+        setTimeout(once,600);
+      }else{
+        doSpeak(text,btn);
+      }
+    }catch(e){fallbackListen(text);}
+  }
+
+  function render(){
+    buildOrder();
+    document.getElementById('s-total').textContent=CARDS.length;
+    var learnedCount=0;for(var k in learned)if(learned[k])learnedCount++;
+    document.getElementById('s-learned').textContent=learnedCount;
+    document.getElementById('s-remain').textContent=CARDS.length-learnedCount;
+    bar.style.width=(CARDS.length?(learnedCount/CARDS.length*100):0)+"%";
+
+    if(!state.order.length){
+      stage.innerHTML='<div class="empty"><b>Trống</b>'+
+        (state.filter==="learned"?"Bạn chưa đánh dấu nhớ cụm nào.":"Bạn đã học hết — tuyệt vời!")+'</div>';
+      counter.textContent="0 / 0";
+      document.getElementById('prev').disabled=true;
+      document.getElementById('next').disabled=true;
+      return;
+    }
+    var idx=state.order[state.pos];
+    var card=CARDS[idx];
+    var isLearned=!!learned[idx];
+    var frontFirst=(state.side==="front");
+
+    var topText=frontFirst?esc(card.e):esc(card.m);
+    var topIpa=frontFirst&&state.ipa?'<div class="ipa">'+esc(card.ipa)+'</div>':'';
+    var topClass=frontFirst?"term":"mean";
+
+    var backText=frontFirst?esc(card.m):esc(card.e);
+    var backIpa=(!frontFirst&&state.ipa)?'<div class="ipa">'+esc(card.ipa)+'</div>':'';
+    var backClass=frontFirst?"mean":"term";
+
+    stage.innerHTML=
+      '<div class="counter" id="counter2"></div>'+
+      '<div class="card'+(state.flipped?' flip':'')+'" id="card" tabindex="0" role="button" aria-label="Lật thẻ">'+
+        '<div class="inner">'+
+          '<div class="face front">'+
+            '<span class="tag">'+(frontFirst?"Expression":"Nghĩa")+'</span>'+
+            '<span class="badge"'+(isLearned?'':' hidden')+'>✓ đã nhớ</span>'+
+            '<div class="'+topClass+'">'+topText+'</div>'+topIpa+
+            '<div class="hint">chạm để xem '+(frontFirst?"nghĩa":"cụm từ")+'</div>'+
+            '<button class="speak" data-say="'+esc(card.e)+'" aria-label="Phát âm">🔊</button>'+
+          '</div>'+
+          '<div class="face back">'+
+            '<span class="tag">'+(frontFirst?"Nghĩa":"Expression")+'</span>'+
+            '<div class="'+backClass+'">'+backText+'</div>'+backIpa+
+            '<div class="ex">'+exHTML(card)+'</div>'+
+            '<button class="speak" data-say="'+esc(card.e)+'" aria-label="Phát âm">🔊</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="actions">'+
+        '<button class="no" id="btn-no">✕ Chưa nhớ</button>'+
+        '<button class="yes" id="btn-yes">✓ Nhớ rồi</button>'+
+      '</div>';
+
+    counter.textContent=(state.pos+1)+" / "+state.order.length;
+    document.getElementById('prev').disabled=false;
+    document.getElementById('next').disabled=false;
+
+    var cardEl=document.getElementById('card');
+    cardEl.addEventListener('click',function(ev){
+      if(ev.target.closest('.speak'))return;
+      flip();
+    });
+    cardEl.addEventListener('keydown',function(ev){if(ev.key===" "||ev.key==="Enter"){ev.preventDefault();flip();}});
+    Array.prototype.forEach.call(stage.querySelectorAll('.speak'),function(b){
+      b.addEventListener('click',function(ev){ev.stopPropagation();speak(b.getAttribute('data-say'),b);});
+    });
+    document.getElementById('btn-yes').addEventListener('click',function(){mark(idx,true);});
+    document.getElementById('btn-no').addEventListener('click',function(){mark(idx,false);});
+  }
+
+  function flip(){state.flipped=!state.flipped;var c=document.getElementById('card');if(c)c.classList.toggle('flip',state.flipped);}
+  function go(d){
+    if(!state.order.length)return;
+    state.pos+=d;
+    if(state.pos<0)state.pos=state.order.length-1;
+    if(state.pos>=state.order.length)state.pos=0;
+    state.flipped=false;render();
+  }
+  function mark(idx,val){
+    if(val)learned[idx]=true;else delete learned[idx];
+    save();
+    // nếu đang lọc và thẻ không còn thuộc bộ lọc, giữ vị trí hợp lý
+    var curFilter=state.filter;
+    if((curFilter==="new"&&val)||(curFilter==="learned"&&!val)){
+      state.flipped=false;render(); // thẻ rời khỏi danh sách, pos tự trỏ sang thẻ kế
+    }else{
+      go(1);
+    }
+  }
+
+  // Controls
+  function wireSeg(id,attr,apply){
+    document.getElementById(id).addEventListener('click',function(e){
+      var b=e.target.closest('button');if(!b)return;
+      Array.prototype.forEach.call(this.children,function(c){c.classList.remove('on');});
+      b.classList.add('on');
+      apply(b.getAttribute(attr));
+    });
+  }
+  wireSeg('filter','data-f',function(v){state.filter=v;state.pos=0;state.flipped=false;render();});
+  wireSeg('side','data-s',function(v){state.side=v;state.flipped=false;render();});
+  document.getElementById('opts').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    var o=b.getAttribute('data-o');
+    if(o==="ipa"){state.ipa=!state.ipa;b.classList.toggle('on',state.ipa);render();}
+    if(o==="shuffle"){state.shuffle=!state.shuffle;b.classList.toggle('on',state.shuffle);state.pos=0;render();}
+  });
+
+  document.getElementById('prev').addEventListener('click',function(){go(-1);});
+  document.getElementById('next').addEventListener('click',function(){go(1);});
+
+  document.getElementById('reset').addEventListener('click',function(){
+    learned={};save();state.pos=0;state.flipped=false;render();
+  });
+
+  // Theme toggle
+  var tbtn=document.getElementById('theme');
+  function curTheme(){
+    var attr=document.documentElement.getAttribute('data-theme');
+    if(attr)return attr;
+    return window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  }
+  function syncIcon(){tbtn.textContent=curTheme()==='dark'?'☀':'☾';}
+  try{var sv=localStorage.getItem('amexpr_theme');if(sv)document.documentElement.setAttribute('data-theme',sv);}catch(e){}
+  syncIcon();
+  tbtn.addEventListener('click',function(){
+    var next=curTheme()==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);
+    try{localStorage.setItem('amexpr_theme',next);}catch(e){}
+    syncIcon();
+  });
+
+  // Keyboard
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='BUTTON'&&e.key==='Enter')return;
+    if(e.key===' '){e.preventDefault();flip();}
+    else if(e.key==='ArrowLeft'||e.key==='1'){var idx=state.order[state.pos];if(idx!=null)mark(idx,false);}
+    else if(e.key==='ArrowRight'||e.key==='2'){var i2=state.order[state.pos];if(i2!=null)mark(i2,true);}
+  });
+
+  if('speechSynthesis'in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=function(){};}
+  render();
+})();
+</script>
