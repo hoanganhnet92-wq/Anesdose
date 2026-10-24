@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ôn thi Nghe Nói</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --card:#ffffff; --ink:#1f2a2e; --muted:#5c6b70;
+    --accent:#0f766e; --accent-soft:#d7ece9; --line:#e3ded3; --warn:#9a5b00; --warn-soft:#fdf1dd;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14191b; --card:#1d2427; --ink:#e8eceb; --muted:#9fb0b2;
+      --accent:#5ec5b8; --accent-soft:#19302d; --line:#2b3438; --warn:#e3a94b; --warn-soft:#2e2411;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14191b; --card:#1d2427; --ink:#e8eceb; --muted:#9fb0b2;
+    --accent:#5ec5b8; --accent-soft:#19302d; --line:#2b3438; --warn:#e3a94b; --warn-soft:#2e2411;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:16px;}
+  header.top{padding:26px 16px 18px; text-align:center;}
+  header.top h1{font-size:1.55rem; margin:0 0 6px; letter-spacing:-.01em;}
+  header.top .sub{color:var(--muted); font-size:.92rem;}
+  header.top .pills{margin-top:12px; display:flex; gap:6px; flex-wrap:wrap; justify-content:center;}
+  .pill{background:var(--accent-soft); color:var(--accent); font-size:.76rem; font-weight:600; padding:4px 10px; border-radius:999px;}
+  .intro{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:14px; font-size:.95rem;}
+  .intro strong{color:var(--accent);}
+  details.sec{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    margin-bottom:10px; overflow:hidden;
+  }
+  details.sec>summary{
+    cursor:pointer; list-style:none; padding:15px 16px; display:flex; align-items:center; gap:12px;
+    font-weight:650; font-size:1.02rem;
+  }
+  details.sec>summary::-webkit-details-marker{display:none}
+  .num{flex:0 0 auto; width:28px; height:28px; border-radius:8px; background:var(--accent); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:.9rem; font-weight:700;}
+  summary .chev{margin-left:auto; color:var(--muted); transition:transform .2s;}
+  details[open] summary .chev{transform:rotate(90deg);}
+  .body{padding:2px 16px 18px; font-size:.95rem;}
+  .body p{margin:.5em 0;}
+  h4{margin:1.1em 0 .3em; font-size:1rem; color:var(--accent);}
+  .ex{background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 8px 8px 0;
+     padding:9px 12px; margin:.5em 0; font-size:.92rem;}
+  .ex .en{font-style:italic;}
+  .kw{font-size:.86rem; color:var(--muted); margin:.3em 0;}
+  .note{background:var(--warn-soft); border-left:3px solid var(--warn); border-radius:0 8px 8px 0;
+     padding:9px 12px; margin:.6em 0; font-size:.88rem;}
+  ul,ol{padding-left:1.25em; margin:.4em 0;}
+  li{margin:.28em 0;}
+  table{width:100%; border-collapse:collapse; margin:.6em 0; font-size:.86rem;}
+  th,td{border:1px solid var(--line); padding:7px 8px; text-align:left; vertical-align:top;}
+  th{background:var(--accent-soft); color:var(--accent); font-weight:650;}
+  td:first-child{font-weight:600;}
+  a{color:var(--accent); word-break:break-word;}
+  code{background:rgba(127,127,127,.14); padding:1px 5px; border-radius:5px; font-size:.85em;}
+  .chk{list-style:none; padding-left:0;}
+  .chk li{padding-left:1.7em; position:relative;}
+  .chk li::before{content:"☐"; position:absolute; left:0; color:var(--accent); font-size:1.05em;}
+  footer{color:var(--muted); font-size:.82rem; text-align:center; padding:20px 16px 36px;}
+  .controls{text-align:center; margin:4px 0 16px;}
+  .controls button{background:var(--card); border:1px solid var(--line); color:var(--muted);
+    font-size:.82rem; padding:6px 12px; border-radius:999px; cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Giáo trình ôn thi cấp tốc<br>Tiếng Anh Nghe – Nói</h1>
+    <div class="sub">Trình độ A2 · Tiếng Anh tổng quát · Thi 4/11/2026</div>
+    <div class="pills">
+      <span class="pill">11 ngày</span>
+      <span class="pill">Listening</span>
+      <span class="pill">Speaking</span>
+    </div>
+  </header>
+
+  <div class="intro">
+    Bấm vào từng phần để mở rộng. Nguyên tắc vàng cho A2 trong 11 ngày: <strong>học ít nhưng thuộc kỹ và nói thành tiếng</strong> — phần Nói phải nói ra miệng, phần Nghe phải nghe chủ động (nghe rồi nhại lại).
+  </div>
+
+  <div class="controls"><button id="toggleAll">Mở tất cả</button></div>
+
+  <details class="sec">
+    <summary><span class="num">1</span> Tổng quan &amp; chiến lược 11 ngày <span class="chev">›</span></summary>
+    <div class="body">
+      <p>Anh còn <strong>11 ngày</strong> (24/10 → 3/11, thi 4/11) để ôn Nghe và Nói ở trình độ A2. Mục tiêu thực tế không phải giỏi toàn diện, mà là <em>làm chủ một bộ mẫu câu và từ vựng cốt lõi</em> để nghe hiểu ý chính và nói trôi chảy các chủ đề quen thuộc. Ở A2, giám khảo chấm xem anh có <strong>nói được thành câu rõ ràng, đúng cơ bản, và phản xạ được</strong> hay không — không soi nói hay hay phức tạp.</p>
+      <div class="note">Em chưa biết chính xác định dạng đề của kỳ thi nội bộ này (mỗi nơi một khác). Giáo trình dựng theo các dạng phổ biến của bài Nghe–Nói chuẩn A2 (tương tự VSTEP bậc 2 / KET). Nếu anh có đề mẫu hoặc cấu trúc đề, gửi em để chỉnh trọng tâm cho đúng.</div>
+      <p><strong>Cách dùng:</strong> học theo lịch ở Phần 8. Với phần Nói, nói ra miệng và lặp lại nhiều lần cho đến khi bật ra tự nhiên; với phần Nghe, nghe chủ động chứ không nghe thụ động.</p>
+    </div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="num">2</span> Phần NGHE — dạng câu &amp; chiến thuật <span class="chev">›</span></summary>
+    <div class="body">
+      <p>Ở A2, các đoạn nghe <strong>ngắn, chậm, rõ</strong>, chủ đề đời thường. Bốn dạng hay gặp:</p>
+      <ol>
+        <li><strong>Hội thoại ngắn:</strong> hỏi giờ, đặt lịch hẹn, mua hàng, hỏi đường. Câu hỏi: <em>Where are they? / What does the man want? / When will they meet?</em></li>
+        <li><strong>Thông báo / lời nhắn:</strong> loa thông báo, voicemail. Hay hỏi <strong>giờ, số phòng, số điện thoại, ngày</strong>.</li>
+        <li><strong>Hướng dẫn / chỉ đường:</strong> chú ý từ thứ tự (<em>first, then, next, finally</em>) và hướng (<em>turn left, go straight, next to</em>).</li>
+        <li><strong>Nghe lấy thông tin cụ thể:</strong> điền số, tên, giá, ngày giờ vào chỗ trống.</li>
+      </ol>
+      <h4>Chiến thuật khi làm bài</h4>
+      <ul>
+        <li><strong>Đọc câu hỏi trước khi nghe</strong>, gạch chân từ khóa (ai, cái gì, ở đâu, bao nhiêu).</li>
+        <li><strong>Nghe lấy ý chính</strong>, bỏ lỡ một từ thì bỏ qua, bám câu tiếp theo và con số.</li>
+        <li><strong>Chú ý từ đổi hướng:</strong> <em>but, however, actually, sorry</em> — đáp án đúng thường nằm <em>sau</em> (vd: "at 3... <em>actually</em>, make it 4" → đáp án 4).</li>
+        <li><strong>Cẩn thận bẫy số/giờ:</strong> nghe hết câu rồi mới chốt.</li>
+        <li><strong>Không bỏ trống</strong> — không chắc vẫn chọn một đáp án.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="num">3</span> NGHE — số, ngày giờ &amp; nguồn luyện <span class="chev">›</span></summary>
+    <div class="body">
+      <p>Điểm mất nhiều nhất ở A2 là nghe <strong>số, giờ, ngày, tên riêng</strong>. Phải luyện riêng cho nhuần.</p>
+      <h4>Số dễ nhầm</h4>
+      <table>
+        <tr><th>Cặp dễ nhầm</th><th>Cách phân biệt</th></tr>
+        <tr><td>13 <em>thirteen</em> / 30 <em>thirty</em></td><td>13 nhấn cuối <strong>-TEEN</strong>; 30 nhấn đầu <strong>THIR</strong>-ty</td></tr>
+        <tr><td>14 / 40, 15/50 … 19/90</td><td>Cùng quy tắc: -teen nhấn cuối, -ty nhấn đầu</td></tr>
+      </table>
+      <h4>Giờ</h4>
+      <p><em>half past six</em> = 6:30 · <em>a quarter to nine</em> = 8:45 · <em>ten past three</em> = 3:10 · <em>seven forty-five</em> = 7:45. Cách đọc trực tiếp (<em>nine thirty</em>) dễ hơn nhưng đề có thể dùng <em>past / to</em>.</p>
+      <h4>Ngày tháng &amp; chính tả</h4>
+      <p>Quen <em>the third of May / May the third</em>, số thứ tự <em>first, second, third…</em>; chú ý <em>fifteenth</em> vs <em>fiftieth</em>. Thuộc chắc <strong>bảng chữ cái</strong>, nhất là <em>A /eɪ/ – E /iː/ – I /aɪ/</em>, <em>G /dʒiː/ – J /dʒeɪ/</em>, <em>B/P/V/D</em>, <em>W /ˈdʌbljuː/</em>.</p>
+      <h4>Từ tín hiệu nên thuộc</h4>
+      <ul>
+        <li><strong>Thời gian:</strong> at, on, in, next, tomorrow, later, before, after, o'clock, half past, quarter</li>
+        <li><strong>Nơi chốn:</strong> next to, opposite, behind, in front of, between, on the corner</li>
+        <li><strong>Chỉ dẫn:</strong> first, then, next, after that, finally</li>
+        <li><strong>Đổi ý (bẫy):</strong> but, however, actually, sorry, instead</li>
+      </ul>
+      <h4>Nguồn luyện miễn phí (15–20 phút/ngày)</h4>
+      <table>
+        <tr><th>Nguồn</th><th>Link</th></tr>
+        <tr><td>British Council – LearnEnglish (Listening A1–A2)</td><td><a href="https://learnenglish.britishcouncil.org/skills/listening">learnenglish.britishcouncil.org</a></td></tr>
+        <tr><td>BBC Learning English</td><td><a href="https://www.bbc.co.uk/learningenglish">bbc.co.uk/learningenglish</a></td></tr>
+        <tr><td>ELLLO (hội thoại có script)</td><td><a href="https://www.elllo.org">elllo.org</a></td></tr>
+        <tr><td>Randall's ESL Cyber Listening Lab</td><td><a href="https://www.esl-lab.com">esl-lab.com</a></td></tr>
+      </table>
+      <p><strong>Cách luyện mỗi bài:</strong> nghe lần 1 không nhìn chữ → lần 2 trả lời câu hỏi → mở script nghe lần 3 và <strong>nhại theo (shadowing)</strong>.</p>
+    </div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="num">4</span> Phần NÓI — dạng đề &amp; khung câu <span class="chev">›</span></summary>
+    <div class="body">
+      <h4>Dạng 1 — Giới thiệu bản thân (gần như chắc chắn có)</h4>
+      <div class="ex en">My name is… / I'm … years old. / I live in Hai Phong. / I have a job. I work at […]. / In my free time, I like… / I have a small family.</div>
+      <h4>Dạng 2 — Trả lời câu hỏi chủ đề quen thuộc</h4>
+      <p>Dùng khung <strong>Trả lời + Lý do/Chi tiết</strong>, thêm 1–2 câu mở rộng.</p>
+      <div class="ex en">"Do you like…?" → "Yes, I like it very much because…" · What + Why ("…because it's…") + Example ("For example,…").</div>
+      <h4>Dạng 3 — Miêu tả tranh</h4>
+      <div class="ex en">This is a picture of… / In the picture, I can see… / There is a… / The man is …-ing. / They are at… / I think they are happy.</div>
+      <p>Luôn theo thứ tự: <strong>ở đâu → ai/cái gì → đang làm gì (-ing) → cảm nhận (I think…)</strong>.</p>
+      <h4>Dạng 4 — Hội thoại tình huống (role-play)</h4>
+      <div class="ex"><span class="en">Hỏi: Excuse me, where is…? / How much is…? / Can I have…, please?</span><br><span class="en">Đáp: Sure. / Here you are. / It's over there.</span></div>
+      <h4>Nguyên tắc chấm điểm A2</h4>
+      <ul>
+        <li><strong>Nói thành câu đầy đủ</strong> — "Yes" mất điểm; "Yes, I do. I go there every day." được điểm.</li>
+        <li><strong>Chậm mà rõ</strong> hơn nhanh mà vấp.</li>
+        <li><strong>Sai ngữ pháp nhỏ không sao</strong> — cứ nói tiếp, im lặng lâu mới mất điểm nặng.</li>
+        <li>Dùng từ nối: <em>and, but, because, so, then, also</em>.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="num">5</span> Ngân hàng chủ đề NÓI — câu mẫu <span class="chev">›</span></summary>
+    <div class="body">
+      <p>Đây là <strong>ruột của giáo trình</strong>. Học thuộc, thay thông tin của mình, nói to nhiều lần. Nên thu âm lại để sửa.</p>
+
+      <h4>5.1 Bản thân &amp; gia đình</h4>
+      <div class="ex en">My name is […]. I'm […] years old. I live in Hai Phong with my family. I'm married and I have […] children. My family is small but happy.</div>
+      <p class="kw">Từ khóa: married, single, children, parents, brother, sister, wife, husband.</p>
+
+      <h4>5.2 Công việc</h4>
+      <div class="ex en">I work at […]. I usually start work early in the morning. My job is busy and sometimes stressful, but I like it because I help people. I work with many colleagues.</div>
+      <p class="kw">Từ khóa: work, office, company, colleague, boss, busy, salary; I start/finish work at…; thay […] bằng nơi làm của anh. Bản rút gọn: <em>I have a job. I work at… . I like my job because…</em></p>
+
+      <h4>5.3 Thói quen hằng ngày</h4>
+      <div class="ex en">I usually get up at […]. I have breakfast and then I go to work. In the evening, I come home, have dinner with my family, and watch TV. On weekends, I rest and spend time with my children.</div>
+      <p class="kw">Từ khóa: get up, have breakfast/dinner, go to work, come home, go to bed; usually, always, sometimes, every day.</p>
+
+      <h4>5.4 Sở thích</h4>
+      <div class="ex en">In my free time, I like [reading / listening to music / watching football / cooking]. I also like spending time with my family. It helps me relax after a busy week.</div>
+      <p class="kw">Từ khóa: reading, music, football, cooking, traveling; relax, enjoy, have fun.</p>
+
+      <h4>5.5 Quê hương (Hải Phòng)</h4>
+      <div class="ex en">I live in Hai Phong. It's a big city in the north of Vietnam. It's near the sea, so the food is very good, especially seafood. People here are friendly. I like my city because my family is here.</div>
+      <p class="kw">Từ khóa: city, hometown, near the sea, seafood, port, friendly people, crowded, busy.</p>
+
+      <h4>5.6 Sức khỏe</h4>
+      <div class="ex en">To stay healthy, I try to eat healthy food and sleep enough. I don't smoke. Sometimes I walk or do exercise. I think health is very important.</div>
+      <p class="kw">Từ khóa: healthy, exercise, sleep well, eat vegetables, medicine; I have a headache / a cold / a fever.</p>
+
+      <h4>5.7 Du lịch</h4>
+      <div class="ex en">I like traveling. Last year, I went to […]. I went there with my family by [car / plane / train]. We stayed for […] days. The weather was nice and the food was delicious.</div>
+      <p class="kw">Chú ý thì quá khứ: went, was, stayed, visited. Từ khóa: trip, holiday, beach, mountain, hotel.</p>
+
+      <h4>5.8 Ăn uống</h4>
+      <div class="ex en">My favorite food is […]. I usually eat rice, meat, fish, and vegetables. In Hai Phong, I like seafood and "banh da cua". I usually have dinner at home with my family.</div>
+      <p class="kw">Từ khóa: rice, noodles, meat, fish, vegetables, seafood, spicy, sweet, delicious.</p>
+
+      <div class="note">Mỗi ngày học kỹ 1–2 chủ đề, nói to 5 lần, rồi tự hỏi–tự trả lời không nhìn giấy (<em>Do you like your job? What time do you get up?</em>).</div>
+    </div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="num">6</span> Phát âm cho người Việt — 5 lỗi <span class="chev">›</span></summary>
+    <div class="body">
+      <p>Giám khảo A2 chấm cao nhất là <strong>phát âm rõ để hiểu được</strong>, không cần giọng bản xứ.</p>
+      <ol>
+        <li><strong>Nuốt âm cuối</strong> (nặng nhất): hay bỏ <em>-s, -t, -d, -k, -p</em>. <em>like/liked, work/works</em> khác nhau nhờ âm cuối → cố ý bật nhẹ.</li>
+        <li><strong>Âm /s/, /z/ cuối từ</strong> (số nhiều, ngôi 3): <em>doctors, patients, works, it's</em>. Thiếu /s/ là sai ngữ pháp nghe thấy ngay.</li>
+        <li><strong>Âm /θ/ và /ð/ (th):</strong> đặt lưỡi giữa hai răng. <em>think, three, health</em> (/θ/) · <em>this, that, they</em> (/ð/, có rung). Đừng đọc thành <em>t/d</em>.</li>
+        <li><strong>Trọng âm từ:</strong> <em>ˈdoctor, ˈhospital, ˈfamily, toˈday, aˈbout</em>. Học từ mới là học luôn chỗ nhấn.</li>
+        <li><strong>Nguyên âm dài–ngắn:</strong> <em>ship /ɪ/ vs sheep /iː/</em>. Chú ý để không nhầm nghĩa.</li>
+      </ol>
+      <div class="note">Cách luyện nhanh nhất: <strong>shadowing</strong> — mở bài nghe A2 có script, nghe từng câu rồi nói nhại lại ngay, bắt chước nhịp và âm cuối. 10 phút/ngày.</div>
+    </div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="num">7</span> Mẫu câu "cứu nguy" trong phòng thi <span class="chev">›</span></summary>
+    <div class="body">
+      <p>Thuộc lòng để <strong>không bao giờ đứng hình im lặng</strong> — im lặng lâu mới mất điểm nặng, không phải nói sai.</p>
+      <h4>Xin nhắc lại</h4>
+      <div class="ex en">Sorry, could you say that again, please? / Could you repeat the question, please? / Sorry, I didn't catch that.</div>
+      <h4>Câu giờ</h4>
+      <div class="ex en">Well,… / Let me think. / That's a good question. / Hmm, let me see.</div>
+      <h4>Không biết từ</h4>
+      <div class="ex en">I don't know the word in English, but it's a thing you use to… / It's like a… / How do you say… in English?</div>
+      <h4>Sửa lại khi nói sai</h4>
+      <div class="ex en">Sorry, I mean… / What I want to say is…</div>
+      <div class="note">Chọn <strong>2–3 câu dễ nhất</strong> và thuộc thật trơn (vd: <em>Could you repeat that, please?</em> và <em>Well, let me think.</em>). Khi bí: bật câu giờ, hít thở, rồi nói tiếp.</div>
+    </div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="num">8</span> Lịch ôn chi tiết 11 ngày <span class="chev">›</span></summary>
+    <div class="body">
+      <p>Mỗi ngày ~<strong>45–60 phút</strong>, chia đôi Nghe / Nói. Phần Nói phải nói ra tiếng.</p>
+      <table>
+        <tr><th>Ngày</th><th>NGHE</th><th>NÓI</th></tr>
+        <tr><td>1 · T7 24/10</td><td>Số &amp; giờ (P.3): 13/30, 14/40…</td><td>Thuộc giới thiệu bản thân (5.1) + công việc (5.2)</td></tr>
+        <tr><td>2 · CN 25/10</td><td>Hội thoại ngắn + ngày tháng, spelling</td><td>Thói quen (5.3) + sở thích (5.4)</td></tr>
+        <tr><td>3 · T2 26/10</td><td>Thông báo / lời nhắn (số phòng, giờ, SĐT)</td><td>Quê hương (5.5); ôn 5.1–5.2</td></tr>
+        <tr><td>4 · T3 27/10</td><td>Hướng dẫn &amp; chỉ đường</td><td>Sức khỏe (5.6) + du lịch (5.7)</td></tr>
+        <tr><td>5 · T4 28/10</td><td>Ôn số/giờ/ngày/spelling</td><td>Ăn uống (5.8) + miêu tả tranh (Dạng 3)</td></tr>
+        <tr><td>6 · T5 29/10</td><td>Nghe tổng hợp 4 dạng, tự chấm</td><td>Role-play (Dạng 4) + mẫu câu cứu nguy (P.7)</td></tr>
+        <tr><td>7 · T6 30/10</td><td>Nghe + shadowing</td><td>Phát âm (P.6); ôn tất cả câu mẫu</td></tr>
+        <tr><td>8 · T7 31/10</td><td><strong>THI THỬ 1</strong>: bấm giờ 1 bài nghe</td><td>Nói hết 8 chủ đề không nhìn giấy, thu âm</td></tr>
+        <tr><td>9 · CN 1/11</td><td>Nghe lại phần làm sai</td><td>Sửa chủ đề &amp; phát âm yếu nhất</td></tr>
+        <tr><td>10 · T2 2/11</td><td><strong>THI THỬ 2</strong> (dạng khác)</td><td>Ôn giới thiệu bản thân + câu cứu nguy</td></tr>
+        <tr><td>11 · T3 3/11</td><td>Nghe nhẹ 15 phút, không học mới</td><td>Đọc lướt câu mẫu, nói vài câu, ngủ sớm</td></tr>
+        <tr><td><strong>THI · T4 4/11</strong></td><td colspan="2">Bình tĩnh, nói chậm–rõ, không im lặng</td></tr>
+      </table>
+      <div class="note"><strong>Nếu thiếu thời gian:</strong> ưu tiên phần Nói (5.1, 5.2 và câu cứu nguy P.7) — dễ lấy điểm nhất. Cố không bỏ 2 buổi thi thử.</div>
+    </div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="num">9</span> Checklist ngày thi &amp; tâm lý <span class="chev">›</span></summary>
+    <div class="body">
+      <p><strong>Tối hôm trước:</strong> ôn nhẹ, đọc lại giới thiệu bản thân + câu cứu nguy, <strong>ngủ đủ</strong>.</p>
+      <p><strong>Trước khi vào phòng thi:</strong> nói nhẩm vài câu cho ấm giọng.</p>
+      <h4>Khi làm bài NGHE</h4>
+      <ul class="chk">
+        <li>Đọc câu hỏi &amp; gạch từ khóa trước khi ghi âm chạy</li>
+        <li>Nghe lấy ý chính + số/giờ, bỏ lỡ thì bám câu sau</li>
+        <li>Nghe hết câu rồi mới chốt (cẩn thận bẫy đổi ý)</li>
+        <li>Không bỏ trống câu nào</li>
+      </ul>
+      <h4>Khi thi NÓI</h4>
+      <ul class="chk">
+        <li>Chào giám khảo, mỉm cười, nhìn vào người hỏi</li>
+        <li>Trả lời thành câu đầy đủ, thêm 1–2 câu mở rộng</li>
+        <li>Chậm và rõ; chú ý âm cuối</li>
+        <li>Bí thì dùng câu giờ, tuyệt đối không đứng im</li>
+        <li>Nói sai cứ nói tiếp; sửa thì <em>Sorry, I mean…</em></li>
+      </ul>
+      <div class="note"><strong>Tâm lý:</strong> ở A2, giám khảo muốn thấy anh dám nói và giao tiếp được. Người nói chậm, đơn giản, rõ và tự tin thường điểm cao hơn người nói nhanh mà lí nhí. Cứ hít thở, giữ bình tĩnh và nói — đó là lợi thế lớn nhất trong phòng thi.</div>
+    </div>
+  </details>
+
+  <footer>
+    Giáo trình dựng theo định dạng Nghe–Nói A2 phổ biến. Gửi đề mẫu / cấu trúc đề nếu muốn chỉnh sát hơn.
+  </footer>
+</div>
+
+<script>
+  (function(){
+    var btn = document.getElementById('toggleAll');
+    var secs = Array.prototype.slice.call(document.querySelectorAll('details.sec'));
+    btn.addEventListener('click', function(){
+      var anyClosed = secs.some(function(d){ return !d.open; });
+      secs.forEach(function(d){ d.open = anyClosed; });
+      btn.textContent = anyClosed ? 'Đóng tất cả' : 'Mở tất cả';
+    });
+  })();
+</script>
+</body>
+</html>
