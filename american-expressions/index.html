@@ -1,164 +1,192 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#efe7d9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17150f" media="(prefers-color-scheme: dark)">
+</head>
+<body>
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>American Expressions</title>
 <style>
-/* Layout: một thẻ lật lớn giữa trang, thanh tiến độ + bộ lọc phía trên, nút điều hướng phía dưới. Palette ấm (kem + xanh mòng két + cam đất). */
+/* Layout: giao diện app một màn hình — app bar trên, thẻ vuốt ở giữa, thanh nút tròn dưới; tùy chọn trong bottom sheet. Palette ấm (kem + teal + cam đất). */
 :root{
-  --bg:#f4efe6; --surface:#fffdf8; --ink:#2b2622; --muted:#8a7f72;
+  --bg:#efe7d9; --surface:#fffdf8; --ink:#2b2622; --muted:#8a7f72;
   --line:#e3dac9; --accent:#1f7a6d; --accent-soft:#d9ebe6;
-  --warm:#c8632f; --warm-soft:#f6e3d6; --good:#1f7a6d; --shadow:rgba(61,47,30,.14);
+  --warm:#c8632f; --warm-soft:#f7e6d9; --good:#1f7a6d; --good-ink:#fff;
+  --shadow:rgba(61,47,30,.16);
   --disp:"Fraunces",Georgia,serif; --body:"Figtree",system-ui,sans-serif;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#1c1a17; --surface:#262320; --ink:#f0e9dc; --muted:#a79b89;
+  --bg:#17150f; --surface:#262320; --ink:#f0e9dc; --muted:#a79b89;
   --line:#3a352e; --accent:#59c3b2; --accent-soft:#1f3b36;
-  --warm:#e08a52; --warm-soft:#3a2b20; --good:#59c3b2; --shadow:rgba(0,0,0,.4);
-  color-scheme:dark;
+  --warm:#e08a52; --warm-soft:#3a2b20; --good:#59c3b2; --good-ink:#10201d;
+  --shadow:rgba(0,0,0,.5); color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#1c1a17; --surface:#262320; --ink:#f0e9dc; --muted:#a79b89;
+  --bg:#17150f; --surface:#262320; --ink:#f0e9dc; --muted:#a79b89;
   --line:#3a352e; --accent:#59c3b2; --accent-soft:#1f3b36;
-  --warm:#e08a52; --warm-soft:#3a2b20; --good:#59c3b2; --shadow:rgba(0,0,0,.4);
-  color-scheme:dark;
+  --warm:#e08a52; --warm-soft:#3a2b20; --good:#59c3b2; --good-ink:#10201d;
+  --shadow:rgba(0,0,0,.5); color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);
-  min-height:100%;display:flex;flex-direction:column;line-height:1.5;-webkit-tap-highlight-color:transparent}
-.wrap{width:100%;max-width:560px;margin:0 auto;flex:1;display:flex;flex-direction:column;
-  padding-left:max(16px,env(safe-area-inset-left,0px));
-  padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-block:18px 24px}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);margin:0;
+  line-height:1.5;overflow:hidden;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
-.brand{font-family:var(--disp);font-weight:600;font-size:1.5rem;letter-spacing:-.01em}
-.brand span{color:var(--accent)}
-.theme-btn{background:var(--surface);border:1px solid var(--line);color:var(--ink);
-  width:40px;height:40px;border-radius:12px;font-size:1.1rem;cursor:pointer;flex:none}
+.app{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;
+  padding-inline:max(14px,env(safe-area-inset-left,0px)) max(14px,env(safe-area-inset-right,0px))}
 
-.stats{display:flex;gap:8px;margin-bottom:12px}
-.stat{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:14px;
-  padding:10px 8px;text-align:center}
-.stat b{display:block;font-size:1.3rem;font-family:var(--disp);font-variant-numeric:tabular-nums}
-.stat small{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
-.stat.learned b{color:var(--good)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-block:12px 8px}
+.title{font-family:var(--disp);font-weight:600;font-size:1.3rem;letter-spacing:-.01em;display:flex;
+  flex-direction:column;line-height:1.1}
+.title .mode{font-family:var(--body);font-weight:600;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--accent);margin-top:2px}
+.top-actions{display:flex;gap:7px}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
+  color:var(--ink);font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+.icon-btn:active{transform:scale(.93)}
 
-.bar{height:7px;border-radius:99px;background:var(--line);overflow:hidden;margin-bottom:14px}
-.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .35s ease;border-radius:99px}
+.progress{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:2px}
+.progress>i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .35s ease}
+.ptext{text-align:center;color:var(--muted);font-size:.72rem;margin-top:6px;font-variant-numeric:tabular-nums}
 
-.controls{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
-.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
-.seg button{border:none;background:none;color:var(--muted);font-family:var(--body);font-size:.82rem;
-  padding:6px 11px;border-radius:8px;cursor:pointer;font-weight:600;white-space:nowrap}
-.seg button.on{background:var(--accent);color:#fff}
-:root[data-theme="dark"] .seg button.on,
-:root:not([data-theme="light"]) .seg button.on{color:#10201d}
-@media (prefers-color-scheme:light){.seg button.on{color:#fff}}
+.deck{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;
+  padding:14px 2px}
+.ghost{position:absolute;width:100%;height:calc(100% - 28px);border-radius:24px;background:var(--surface);
+  border:1px solid var(--line);opacity:.55;transform:translateY(12px) scale(.94);z-index:0}
 
-.stage{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:300px;gap:16px}
-.counter{text-align:center;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums}
-
-.card{position:relative;width:100%;aspect-ratio:3/2;max-width:100%;cursor:pointer;
-  perspective:1400px;user-select:none}
-.inner{position:absolute;inset:0;transition:transform .5s cubic-bezier(.2,.7,.2,1);
-  transform-style:preserve-3d}
+.card{position:relative;width:100%;height:calc(100% - 12px);z-index:1;cursor:grab;
+  touch-action:none;will-change:transform}
+.card.spring{transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.card.fly{transition:transform .32s ease,opacity .32s ease}
+.card:active{cursor:grabbing}
+.inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
 .card.flip .inner{transform:rotateY(180deg)}
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  background:var(--surface);border:1px solid var(--line);border-radius:22px;
-  box-shadow:0 10px 30px -14px var(--shadow);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:26px 22px;gap:12px}
+  background:var(--surface);border:1px solid var(--line);border-radius:24px;
+  box-shadow:0 14px 34px -16px var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:28px 24px;gap:13px}
 .face.back{transform:rotateY(180deg);background:var(--accent-soft);border-color:transparent}
-.tag{position:absolute;top:14px;left:16px;font-size:.68rem;text-transform:uppercase;
-  letter-spacing:.08em;color:var(--muted);font-weight:700}
-.badge{position:absolute;top:12px;right:14px;font-size:.66rem;font-weight:700;padding:3px 9px;
-  border-radius:99px;background:var(--good);color:#fff;letter-spacing:.03em}
-:root[data-theme="dark"] .badge,:root:not([data-theme="light"]) .badge{color:#10201d}
-@media (prefers-color-scheme:light){.badge{color:#fff}}
+.tag{position:absolute;top:16px;left:18px;font-size:.66rem;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--muted);font-weight:700}
+.badge{position:absolute;top:14px;right:16px;font-size:.64rem;font-weight:700;padding:3px 9px;border-radius:99px;
+  background:var(--good);color:var(--good-ink);letter-spacing:.03em}
 .badge[hidden]{display:none!important}
-
-.term{font-family:var(--disp);font-weight:600;font-size:clamp(1.5rem,6.5vw,2.1rem);
-  line-height:1.15;text-wrap:balance}
-.ipa{color:var(--muted);font-size:1rem;letter-spacing:.01em}
+.term{font-family:var(--disp);font-weight:600;font-size:clamp(1.6rem,7vw,2.3rem);line-height:1.12;text-wrap:balance}
+.ipa{color:var(--muted);font-size:1.02rem}
 .ipa[hidden]{display:none!important}
-.mean{font-family:var(--disp);font-weight:500;font-size:clamp(1.25rem,5.5vw,1.7rem);
-  line-height:1.25;text-wrap:balance;color:var(--ink)}
-.ex{font-size:.95rem;color:var(--muted);font-style:italic;max-width:42ch;line-height:1.45}
+.mean{font-family:var(--disp);font-weight:500;font-size:clamp(1.3rem,6vw,1.8rem);line-height:1.22;text-wrap:balance}
+.ex{font-size:.96rem;color:var(--muted);font-style:italic;max-width:40ch;line-height:1.45}
 .ex b{color:var(--warm);font-style:normal;font-weight:600}
-.hint{color:var(--muted);font-size:.8rem;opacity:.8}
-.speak{position:absolute;bottom:12px;right:14px;background:none;border:1px solid var(--line);
-  color:var(--accent);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem;
+.hint{color:var(--muted);font-size:.78rem;opacity:.75}
+.speak{position:absolute;bottom:16px;right:18px;width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--line);background:var(--bg);color:var(--accent);font-size:1.05rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center}
-.speak:active{transform:scale(.92)}
+.speak:active{transform:scale(.9)}
 
-.actions{display:flex;gap:10px}
-.actions button{flex:1;border:none;border-radius:14px;padding:14px;font-family:var(--body);
-  font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;gap:7px;transition:transform .08s}
-.actions button:active{transform:scale(.97)}
-.no{background:var(--warm-soft);color:var(--warm)}
-.yes{background:var(--good);color:#fff}
-:root[data-theme="dark"] .yes,:root:not([data-theme="light"]) .yes{color:#10201d}
-@media (prefers-color-scheme:light){.yes{color:#fff}}
+.swipe-label{position:absolute;top:22px;font-family:var(--disp);font-weight:700;font-size:1.3rem;
+  padding:5px 14px;border-radius:12px;border:3px solid;opacity:0;pointer-events:none;z-index:2;transition:opacity .1s}
+.swipe-label.like{right:20px;color:var(--good);border-color:var(--good);transform:rotate(12deg)}
+.swipe-label.nope{left:20px;color:var(--warm);border-color:var(--warm);transform:rotate(-12deg)}
 
-.nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.nav button{background:var(--surface);border:1px solid var(--line);color:var(--ink);
-  border-radius:12px;padding:10px 16px;font-family:var(--body);font-weight:600;cursor:pointer;font-size:.88rem}
-.nav button:disabled{opacity:.4;cursor:default}
+.counter{text-align:center;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums;padding-top:2px}
 
-.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:1rem}
-.empty b{display:block;font-family:var(--disp);font-size:1.3rem;color:var(--ink);margin-bottom:6px}
+.bottombar{display:flex;align-items:center;justify-content:center;gap:26px;padding-block:14px 16px}
+.circle{border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 20px -10px var(--shadow);transition:transform .1s}
+.circle:active{transform:scale(.9)}
+.circle.no{width:60px;height:60px;background:var(--warm-soft);color:var(--warm);font-size:1.5rem}
+.circle.yes{width:60px;height:60px;background:var(--good);color:var(--good-ink);font-size:1.5rem}
+.circle.flip{width:52px;height:52px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:1.35rem}
 
-.foot{text-align:center;color:var(--muted);font-size:.74rem;margin-top:18px;line-height:1.6}
-.foot button{background:none;border:none;color:var(--warm);font-size:.74rem;cursor:pointer;
-  text-decoration:underline;font-family:var(--body)}
-.kbd{display:none}
-@media(min-width:620px){.kbd{display:block}}
+.empty{text-align:center;color:var(--muted);padding:40px 20px;z-index:1}
+.empty b{display:block;font-family:var(--disp);font-size:1.4rem;color:var(--ink);margin-bottom:6px}
+
+/* Bottom sheet */
+.backdrop{position:fixed;inset:0;background:rgba(20,16,10,.45);z-index:20;opacity:0;transition:opacity .25s}
+.backdrop.show{opacity:1}
+.backdrop[hidden]{display:none!important}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);
+  border-radius:22px 22px 0 0;box-shadow:0 -12px 40px -16px var(--shadow);
+  padding:8px max(18px,env(safe-area-inset-left,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-right,0px));
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);max-width:520px;margin:0 auto}
+.sheet.show{transform:translateY(0)}
+.sheet[hidden]{display:none!important}
+.grip{width:40px;height:4px;border-radius:99px;background:var(--line);margin:8px auto 14px}
+.sheet h3{font-family:var(--disp);font-weight:600;font-size:1.15rem;margin:0 0 14px}
+.row{margin-bottom:16px}
+.row>label{display:block;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+  font-weight:700;margin-bottom:7px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:none;background:none;color:var(--muted);font-family:var(--body);font-size:.84rem;
+  padding:9px 6px;border-radius:9px;cursor:pointer;font-weight:600}
+.seg button.on{background:var(--accent);color:var(--good-ink)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+.toggle-row span{font-size:.95rem;font-weight:600}
+.switch{width:50px;height:30px;border-radius:99px;background:var(--line);border:none;position:relative;cursor:pointer;flex:none}
+.switch.on{background:var(--accent)}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;
+  background:#fff;transition:transform .2s}
+.switch.on::after{transform:translateX(20px)}
+.reset-btn{width:100%;margin-top:14px;padding:13px;border-radius:12px;border:1px solid var(--line);
+  background:var(--bg);color:var(--warm);font-family:var(--body);font-weight:700;font-size:.9rem;cursor:pointer}
+
 button:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-@media(prefers-reduced-motion:reduce){.inner{transition:none}.bar>i{transition:none}}
+@media(prefers-reduced-motion:reduce){.inner,.card.spring,.card.fly,.progress>i{transition:none}}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Figtree:wght@400;600;700&display=swap">
 
-<div class="wrap">
-  <header>
-    <div class="brand"><span>American</span> Expressions</div>
-    <button class="theme-btn" id="theme" aria-label="Đổi giao diện sáng/tối">☾</button>
-  </header>
-
-  <div class="stats">
-    <div class="stat"><b id="s-total">100</b><small>Tổng</small></div>
-    <div class="stat"><b id="s-remain">100</b><small>Chưa học</small></div>
-    <div class="stat learned"><b id="s-learned">0</b><small>Đã nhớ</small></div>
+<div class="app">
+  <div class="topbar">
+    <div class="title">Expressions<span class="mode" id="modeLabel">Cụm → Nghĩa</span></div>
+    <div class="top-actions">
+      <button class="icon-btn" id="menuBtn" aria-label="Tùy chọn">☰</button>
+      <button class="icon-btn" id="theme" aria-label="Sáng/tối">☾</button>
+    </div>
   </div>
-  <div class="bar"><i id="bar"></i></div>
 
-  <div class="controls">
+  <div class="progress"><i id="bar"></i></div>
+  <div class="ptext" id="ptext">0 / 100 đã nhớ</div>
+
+  <div class="deck" id="deck"></div>
+  <div class="counter" id="counter">1 / 100</div>
+
+  <div class="bottombar">
+    <button class="circle no" id="btn-no" aria-label="Chưa nhớ">✕</button>
+    <button class="circle flip" id="btn-flip" aria-label="Lật thẻ">⟳</button>
+    <button class="circle yes" id="btn-yes" aria-label="Nhớ rồi">✓</button>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<div class="sheet" id="sheet" hidden>
+  <div class="grip"></div>
+  <h3>Tùy chọn học</h3>
+  <div class="row">
+    <label>Hiển thị thẻ</label>
     <div class="seg" id="filter">
       <button data-f="all" class="on">Tất cả</button>
       <button data-f="new">Chưa học</button>
       <button data-f="learned">Đã nhớ</button>
     </div>
+  </div>
+  <div class="row">
+    <label>Chiều học</label>
     <div class="seg" id="side">
       <button data-s="front" class="on">Cụm → Nghĩa</button>
       <button data-s="back">Nghĩa → Cụm</button>
     </div>
-    <div class="seg" id="opts">
-      <button data-o="ipa" class="on">IPA</button>
-      <button data-o="shuffle">Trộn</button>
-    </div>
   </div>
-
-  <div class="stage" id="stage"></div>
-
-  <div class="nav" id="nav">
-    <button id="prev">← Trước</button>
-    <span class="counter" id="counter">–</span>
-    <button id="next">Sau →</button>
-  </div>
-
-  <div class="foot">
-    100 cụm từ tiếng Anh Mỹ thông dụng · Chạm thẻ để lật · 🔊 phát âm (máy không đọc được sẽ mở trang nghe online)
-    <span class="kbd"><br>Space: lật · 1/←: chưa nhớ · 2/→: nhớ rồi</span>
-    <br><button id="reset">Đặt lại tiến độ</button>
-  </div>
+  <div class="toggle-row"><span>Hiện phiên âm (IPA)</span><button class="switch on" id="sw-ipa" aria-label="Bật/tắt IPA"></button></div>
+  <div class="toggle-row"><span>Trộn ngẫu nhiên</span><button class="switch" id="sw-shuffle" aria-label="Bật/tắt trộn"></button></div>
+  <button class="reset-btn" id="reset">Đặt lại tiến độ học</button>
 </div>
 
 <script>
@@ -272,21 +300,17 @@ const CARDS = [
 <script>
 (function(){
   var KEY="amexpr_learned_v1";
-  var learned={}; // index -> true
+  var learned={};
   try{learned=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){learned={};}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(learned));}catch(e){}}
 
   var state={filter:"all",side:"front",ipa:true,shuffle:false,order:[],pos:0,flipped:false};
-
-  var stage=document.getElementById('stage');
-  var counter=document.getElementById('counter');
-  var bar=document.getElementById('bar');
+  var deck=document.getElementById('deck');
 
   function baseOrder(){var a=[];for(var i=0;i<CARDS.length;i++)a.push(i);return a;}
-  function shuffled(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-
+  function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
   function buildOrder(){
-    var all=state.shuffle?shuffled(baseOrder()):baseOrder();
+    var all=state.shuffle?shuffle(baseOrder()):baseOrder();
     state.order=all.filter(function(i){
       if(state.filter==="learned")return !!learned[i];
       if(state.filter==="new")return !learned[i];
@@ -294,25 +318,19 @@ const CARDS = [
     });
     if(state.pos>=state.order.length)state.pos=Math.max(0,state.order.length-1);
   }
-
-  function esc(s){return s.replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function esc(s){return s.replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function exHTML(card){
-    // bôi đậm cụm từ trong ví dụ (không phân biệt hoa thường, dạng cơ bản)
-    var ex=esc(card.ex);var e=card.e.split(" ")[0];
+    var ex=esc(card.ex),e=card.e.split(" ")[0];
     try{var re=new RegExp("("+e.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+"[\\w' ]*)","i");ex=ex.replace(re,"<b>$1</b>");}catch(_){}
     return ex;
   }
 
   function ttsAvailable(){return ('speechSynthesis'in window)&&('SpeechSynthesisUtterance'in window);}
-  function fallbackListen(text){
-    // Mở trang nghe người bản xứ phát âm khi giọng máy không phát được
-    try{window.open("https://youglish.com/pronounce/"+encodeURIComponent(text)+"/english/us","_blank","noopener");}catch(e){}
-  }
+  function fallbackListen(t){try{window.open("https://youglish.com/pronounce/"+encodeURIComponent(t)+"/english/us","_blank","noopener");}catch(e){}}
   function doSpeak(text,btn){
     if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();
     try{speechSynthesis.resume();}catch(e){}
-    var u=new SpeechSynthesisUtterance(text);
-    u.lang="en-US";u.rate=.9;
+    var u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.9;
     var vs=speechSynthesis.getVoices()||[];
     var v=vs.filter(function(x){return /en[-_]US/i.test(x.lang);})[0]||vs.filter(function(x){return /^en/i.test(x.lang);})[0];
     if(v)u.voice=v;
@@ -321,168 +339,159 @@ const CARDS = [
     u.onend=function(){if(btn)btn.textContent="🔊";};
     u.onerror=function(){if(btn)btn.textContent="🔊";fallbackListen(text);};
     speechSynthesis.speak(u);
-    // Nếu sau 1.5s vẫn im (môi trường chặn giọng máy) → mở trang nghe online
-    setTimeout(function(){
-      if(!started&&!speechSynthesis.speaking){if(btn)btn.textContent="🔊";fallbackListen(text);}
-    },1500);
+    setTimeout(function(){if(!started&&!speechSynthesis.speaking){if(btn)btn.textContent="🔊";fallbackListen(text);}},1500);
   }
   function speak(text,btn){
     if(!ttsAvailable()){fallbackListen(text);return;}
     try{
       var vs=speechSynthesis.getVoices()||[];
-      if(!vs.length){
-        // Giọng chưa tải xong — đợi rồi đọc, kèm hạn chót phòng khi không bao giờ tải
-        var done=false;
-        var once=function(){if(done)return;done=true;doSpeak(text,btn);};
-        speechSynthesis.onvoiceschanged=once;
-        setTimeout(once,600);
-      }else{
-        doSpeak(text,btn);
-      }
+      if(!vs.length){var done=false,once=function(){if(done)return;done=true;doSpeak(text,btn);};
+        speechSynthesis.onvoiceschanged=once;setTimeout(once,600);}
+      else doSpeak(text,btn);
     }catch(e){fallbackListen(text);}
   }
 
-  function render(){
-    buildOrder();
-    document.getElementById('s-total').textContent=CARDS.length;
-    var learnedCount=0;for(var k in learned)if(learned[k])learnedCount++;
-    document.getElementById('s-learned').textContent=learnedCount;
-    document.getElementById('s-remain').textContent=CARDS.length-learnedCount;
-    bar.style.width=(CARDS.length?(learnedCount/CARDS.length*100):0)+"%";
+  function updateStats(){
+    var lc=0;for(var k in learned)if(learned[k])lc++;
+    document.getElementById('bar').style.width=(CARDS.length?lc/CARDS.length*100:0)+"%";
+    document.getElementById('ptext').textContent=lc+" / "+CARDS.length+" đã nhớ";
+    document.getElementById('modeLabel').textContent=state.side==="front"?"Cụm → Nghĩa":"Nghĩa → Cụm";
+  }
 
+  function render(){
+    buildOrder();updateStats();
+    deck.innerHTML='<div class="ghost"></div>';
     if(!state.order.length){
-      stage.innerHTML='<div class="empty"><b>Trống</b>'+
-        (state.filter==="learned"?"Bạn chưa đánh dấu nhớ cụm nào.":"Bạn đã học hết — tuyệt vời!")+'</div>';
-      counter.textContent="0 / 0";
-      document.getElementById('prev').disabled=true;
-      document.getElementById('next').disabled=true;
+      var em=document.createElement('div');em.className='empty';
+      em.innerHTML='<b>Trống</b>'+(state.filter==="learned"?"Chưa có cụm nào được đánh dấu nhớ.":"Bạn đã học hết — tuyệt vời!");
+      deck.appendChild(em);
+      document.getElementById('counter').textContent="0 / 0";
       return;
     }
-    var idx=state.order[state.pos];
-    var card=CARDS[idx];
-    var isLearned=!!learned[idx];
-    var frontFirst=(state.side==="front");
-
-    var topText=frontFirst?esc(card.e):esc(card.m);
-    var topIpa=frontFirst&&state.ipa?'<div class="ipa">'+esc(card.ipa)+'</div>':'';
-    var topClass=frontFirst?"term":"mean";
-
-    var backText=frontFirst?esc(card.m):esc(card.e);
-    var backIpa=(!frontFirst&&state.ipa)?'<div class="ipa">'+esc(card.ipa)+'</div>':'';
-    var backClass=frontFirst?"mean":"term";
-
-    stage.innerHTML=
-      '<div class="counter" id="counter2"></div>'+
-      '<div class="card'+(state.flipped?' flip':'')+'" id="card" tabindex="0" role="button" aria-label="Lật thẻ">'+
-        '<div class="inner">'+
-          '<div class="face front">'+
-            '<span class="tag">'+(frontFirst?"Expression":"Nghĩa")+'</span>'+
-            '<span class="badge"'+(isLearned?'':' hidden')+'>✓ đã nhớ</span>'+
-            '<div class="'+topClass+'">'+topText+'</div>'+topIpa+
-            '<div class="hint">chạm để xem '+(frontFirst?"nghĩa":"cụm từ")+'</div>'+
-            '<button class="speak" data-say="'+esc(card.e)+'" aria-label="Phát âm">🔊</button>'+
-          '</div>'+
-          '<div class="face back">'+
-            '<span class="tag">'+(frontFirst?"Nghĩa":"Expression")+'</span>'+
-            '<div class="'+backClass+'">'+backText+'</div>'+backIpa+
-            '<div class="ex">'+exHTML(card)+'</div>'+
-            '<button class="speak" data-say="'+esc(card.e)+'" aria-label="Phát âm">🔊</button>'+
-          '</div>'+
+    var idx=state.order[state.pos],card=CARDS[idx],isL=!!learned[idx],ff=(state.side==="front");
+    var topT=ff?esc(card.e):esc(card.m),topI=(ff&&state.ipa)?'<div class="ipa">'+esc(card.ipa)+'</div>':'';
+    var backT=ff?esc(card.m):esc(card.e),backI=(!ff&&state.ipa)?'<div class="ipa">'+esc(card.ipa)+'</div>':'';
+    var c=document.createElement('div');
+    c.className='card'+(state.flipped?' flip':'');c.id='card';c.setAttribute('tabindex','0');
+    c.innerHTML=
+      '<div class="swipe-label like">NHỚ</div><div class="swipe-label nope">CHƯA</div>'+
+      '<div class="inner">'+
+        '<div class="face front">'+
+          '<span class="tag">'+(ff?"Expression":"Nghĩa")+'</span>'+
+          '<span class="badge"'+(isL?'':' hidden')+'>✓ đã nhớ</span>'+
+          '<div class="'+(ff?"term":"mean")+'">'+topT+'</div>'+topI+
+          '<div class="hint">chạm để xem '+(ff?"nghĩa":"cụm từ")+'</div>'+
+          '<button class="speak" data-say="'+esc(card.e)+'" aria-label="Phát âm">🔊</button>'+
         '</div>'+
-      '</div>'+
-      '<div class="actions">'+
-        '<button class="no" id="btn-no">✕ Chưa nhớ</button>'+
-        '<button class="yes" id="btn-yes">✓ Nhớ rồi</button>'+
+        '<div class="face back">'+
+          '<span class="tag">'+(ff?"Nghĩa":"Expression")+'</span>'+
+          '<div class="'+(ff?"mean":"term")+'">'+backT+'</div>'+backI+
+          '<div class="ex">'+exHTML(card)+'</div>'+
+          '<button class="speak" data-say="'+esc(card.e)+'" aria-label="Phát âm">🔊</button>'+
+        '</div>'+
       '</div>';
-
-    counter.textContent=(state.pos+1)+" / "+state.order.length;
-    document.getElementById('prev').disabled=false;
-    document.getElementById('next').disabled=false;
-
-    var cardEl=document.getElementById('card');
-    cardEl.addEventListener('click',function(ev){
-      if(ev.target.closest('.speak'))return;
-      flip();
-    });
-    cardEl.addEventListener('keydown',function(ev){if(ev.key===" "||ev.key==="Enter"){ev.preventDefault();flip();}});
-    Array.prototype.forEach.call(stage.querySelectorAll('.speak'),function(b){
-      b.addEventListener('click',function(ev){ev.stopPropagation();speak(b.getAttribute('data-say'),b);});
-    });
-    document.getElementById('btn-yes').addEventListener('click',function(){mark(idx,true);});
-    document.getElementById('btn-no').addEventListener('click',function(){mark(idx,false);});
+    deck.appendChild(c);
+    document.getElementById('counter').textContent=(state.pos+1)+" / "+state.order.length;
+    wireCard(c,idx);
   }
 
   function flip(){state.flipped=!state.flipped;var c=document.getElementById('card');if(c)c.classList.toggle('flip',state.flipped);}
-  function go(d){
-    if(!state.order.length)return;
-    state.pos+=d;
-    if(state.pos<0)state.pos=state.order.length-1;
-    if(state.pos>=state.order.length)state.pos=0;
+
+  function advance(){ // sang thẻ kế sau khi đánh dấu
+    // với bộ lọc new/learned, thẻ vừa đổi trạng thái sẽ rời danh sách → pos giữ nguyên trỏ thẻ kế
+    buildOrder();
+    if(state.filter==="all"){state.pos++;if(state.pos>=state.order.length)state.pos=0;}
+    else{if(state.pos>=state.order.length)state.pos=Math.max(0,state.order.length-1);}
     state.flipped=false;render();
   }
-  function mark(idx,val){
-    if(val)learned[idx]=true;else delete learned[idx];
-    save();
-    // nếu đang lọc và thẻ không còn thuộc bộ lọc, giữ vị trí hợp lý
-    var curFilter=state.filter;
-    if((curFilter==="new"&&val)||(curFilter==="learned"&&!val)){
-      state.flipped=false;render(); // thẻ rời khỏi danh sách, pos tự trỏ sang thẻ kế
-    }else{
-      go(1);
-    }
+  function decide(idx,val,dir){
+    if(val)learned[idx]=true;else delete learned[idx];save();
+    var c=document.getElementById('card');
+    if(c){c.classList.add('fly');
+      c.style.transform='translate('+(dir>0?'130%':'-130%')+',-20px) rotate('+(dir>0?18:-18)+'deg)';
+      c.style.opacity='0';}
+    setTimeout(advance,300);
   }
 
-  // Controls
+  function wireCard(c,idx){
+    var sx=0,sy=0,dx=0,drag=false,down=false;
+    var like=c.querySelector('.like'),nope=c.querySelector('.nope');
+    function setLabels(v){var t=Math.min(1,Math.abs(v)/90);like.style.opacity=v>0?t:0;nope.style.opacity=v<0?t:0;}
+    c.addEventListener('pointerdown',function(e){
+      if(e.target.closest('.speak'))return;
+      down=true;drag=false;sx=e.clientX;sy=e.clientY;dx=0;c.classList.remove('spring');
+      try{c.setPointerCapture(e.pointerId);}catch(_){}
+    });
+    c.addEventListener('pointermove',function(e){
+      if(!down)return;dx=e.clientX-sx;var dy=e.clientY-sy;
+      if(!drag&&(Math.abs(dx)>8||Math.abs(dy)>8))drag=Math.abs(dx)>Math.abs(dy);
+      if(drag){e.preventDefault();c.style.transform='translate('+dx+'px,'+(dy*0.2)+'px) rotate('+(dx*0.05)+'deg)';setLabels(dx);}
+    });
+    function end(){
+      if(!down)return;down=false;
+      if(!drag){ // chạm nhẹ = lật
+        if(Math.abs(dx)<10)flip();
+        c.style.transform='';setLabels(0);return;
+      }
+      if(dx>90){decide(idx,true,1);return;}
+      if(dx<-90){decide(idx,false,-1);return;}
+      c.classList.add('spring');c.style.transform='';setLabels(0);
+    }
+    c.addEventListener('pointerup',end);
+    c.addEventListener('pointercancel',end);
+    c.addEventListener('keydown',function(e){if(e.key===" "||e.key==="Enter"){e.preventDefault();flip();}});
+    Array.prototype.forEach.call(c.querySelectorAll('.speak'),function(b){
+      b.addEventListener('click',function(e){e.stopPropagation();speak(b.getAttribute('data-say'),b);});
+    });
+  }
+
+  // Bottom bar
+  document.getElementById('btn-flip').addEventListener('click',flip);
+  document.getElementById('btn-yes').addEventListener('click',function(){var i=state.order[state.pos];if(i!=null)decide(i,true,1);});
+  document.getElementById('btn-no').addEventListener('click',function(){var i=state.order[state.pos];if(i!=null)decide(i,false,-1);});
+
+  // Sheet
+  var sheet=document.getElementById('sheet'),backdrop=document.getElementById('backdrop');
+  function openSheet(){backdrop.hidden=false;sheet.hidden=false;requestAnimationFrame(function(){backdrop.classList.add('show');sheet.classList.add('show');});}
+  function closeSheet(){backdrop.classList.remove('show');sheet.classList.remove('show');setTimeout(function(){backdrop.hidden=true;sheet.hidden=true;},300);}
+  document.getElementById('menuBtn').addEventListener('click',openSheet);
+  backdrop.addEventListener('click',closeSheet);
+
   function wireSeg(id,attr,apply){
     document.getElementById(id).addEventListener('click',function(e){
       var b=e.target.closest('button');if(!b)return;
-      Array.prototype.forEach.call(this.children,function(c){c.classList.remove('on');});
-      b.classList.add('on');
-      apply(b.getAttribute(attr));
+      Array.prototype.forEach.call(this.children,function(x){x.classList.remove('on');});
+      b.classList.add('on');apply(b.getAttribute(attr));
     });
   }
   wireSeg('filter','data-f',function(v){state.filter=v;state.pos=0;state.flipped=false;render();});
   wireSeg('side','data-s',function(v){state.side=v;state.flipped=false;render();});
-  document.getElementById('opts').addEventListener('click',function(e){
-    var b=e.target.closest('button');if(!b)return;
-    var o=b.getAttribute('data-o');
-    if(o==="ipa"){state.ipa=!state.ipa;b.classList.toggle('on',state.ipa);render();}
-    if(o==="shuffle"){state.shuffle=!state.shuffle;b.classList.toggle('on',state.shuffle);state.pos=0;render();}
-  });
+  document.getElementById('sw-ipa').addEventListener('click',function(){state.ipa=!state.ipa;this.classList.toggle('on',state.ipa);render();});
+  document.getElementById('sw-shuffle').addEventListener('click',function(){state.shuffle=!state.shuffle;this.classList.toggle('on',state.shuffle);state.pos=0;state.flipped=false;render();});
+  document.getElementById('reset').addEventListener('click',function(){learned={};save();state.pos=0;state.flipped=false;render();closeSheet();});
 
-  document.getElementById('prev').addEventListener('click',function(){go(-1);});
-  document.getElementById('next').addEventListener('click',function(){go(1);});
-
-  document.getElementById('reset').addEventListener('click',function(){
-    learned={};save();state.pos=0;state.flipped=false;render();
-  });
-
-  // Theme toggle
+  // Theme
   var tbtn=document.getElementById('theme');
-  function curTheme(){
-    var attr=document.documentElement.getAttribute('data-theme');
-    if(attr)return attr;
-    return window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
-  }
+  function curTheme(){var a=document.documentElement.getAttribute('data-theme');if(a)return a;
+    return window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
   function syncIcon(){tbtn.textContent=curTheme()==='dark'?'☀':'☾';}
   try{var sv=localStorage.getItem('amexpr_theme');if(sv)document.documentElement.setAttribute('data-theme',sv);}catch(e){}
   syncIcon();
-  tbtn.addEventListener('click',function(){
-    var next=curTheme()==='dark'?'light':'dark';
-    document.documentElement.setAttribute('data-theme',next);
-    try{localStorage.setItem('amexpr_theme',next);}catch(e){}
-    syncIcon();
-  });
+  tbtn.addEventListener('click',function(){var n=curTheme()==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('amexpr_theme',n);}catch(e){}syncIcon();});
 
-  // Keyboard
+  // Keyboard (desktop)
   document.addEventListener('keydown',function(e){
-    if(e.target.tagName==='BUTTON'&&e.key==='Enter')return;
+    if(e.target.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;
     if(e.key===' '){e.preventDefault();flip();}
-    else if(e.key==='ArrowLeft'||e.key==='1'){var idx=state.order[state.pos];if(idx!=null)mark(idx,false);}
-    else if(e.key==='ArrowRight'||e.key==='2'){var i2=state.order[state.pos];if(i2!=null)mark(i2,true);}
+    else if(e.key==='ArrowLeft'){var i=state.order[state.pos];if(i!=null)decide(i,false,-1);}
+    else if(e.key==='ArrowRight'){var j=state.order[state.pos];if(j!=null)decide(j,true,1);}
   });
 
-  if('speechSynthesis'in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=function(){};}
+  if('speechSynthesis'in window){speechSynthesis.getVoices();}
   render();
 })();
 </script>
+
+</body>
+</html>
