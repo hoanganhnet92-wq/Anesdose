@@ -2012,6 +2012,7 @@ let EV_QUERY = "";
 let CUR_EVENT = "anaphylaxis";
 let CUR_GROUP = "anes";
 let PICKER_OPEN = true;
+let PICK_LIST_OPEN = false;
 function renderEmergency(){
   const ev = EVENTS.find(e => e.id === CUR_EVENT) || EVENTS[0];
   const inGroup = EVENTS.filter(e => e.grp === CUR_GROUP);
@@ -2031,10 +2032,13 @@ function renderEmergency(){
       <summary><span class="pill">${EV_GROUPS.find(g=>g.key===ev.grp).label}</span> ${ev.short||ev.title}<span class="hint">chạm để đổi</span></summary>
       <div class="grpbar">` + EV_GROUPS.map(g =>
         `<button data-grp="${g.key}" class="${g.key===CUR_GROUP?"on":""}">${g.label}<span>${EVENTS.filter(e=>e.grp===g.key).length}</span></button>`
-      ).join("") + `</div>
-      <div class="picker">` + inGroup.map(e =>
-      `<button data-ev="${e.id}" class="${e.id===ev.id?"on":""}"><b>${e.no}</b> ${e.short||e.title}</button>`
-    ).join("") + `</div></details>`;
+      ).join("") + `</div>`
+   + (PICK_LIST_OPEN
+       ? `<div class="picker">` + inGroup.map(e =>
+           `<button data-ev="${e.id}" class="${e.id===ev.id?"on":""}"><b>${e.no}</b> ${e.short||e.title}</button>`
+         ).join("") + `</div>`
+       : `<div class="grphint" style="padding:10px 14px;color:var(--muted);font-size:12.5px">Chạm một nhóm ở trên để xem danh sách phác đồ</div>`)
+   + `</details>`;
   h += eventCard(ev);
   $("p-emergency").innerHTML = h;
 
@@ -2054,11 +2058,12 @@ function renderEmergency(){
     CUR_GROUP = b.dataset.grp;
     const first = EVENTS.find(x => x.grp === CUR_GROUP);
     if(first) CUR_EVENT = first.id;
-    PICKER_OPEN = true; renderEmergency();
+    PICKER_OPEN = true; PICK_LIST_OPEN = true; renderEmergency();
   });
-  det.querySelector(".picker").addEventListener("click", e => {
+  const pk = det.querySelector(".picker");
+  if(pk) pk.addEventListener("click", e => {
     const b = e.target.closest("button"); if(!b) return;
-    CUR_EVENT = b.dataset.ev; PICKER_OPEN = false; renderEmergency();
+    CUR_EVENT = b.dataset.ev; PICKER_OPEN = false; PICK_LIST_OPEN = false; renderEmergency();
     $("p-emergency").scrollIntoView({block:"start"});
   });
   const tri = $("p-emergency").querySelector(".triage");
