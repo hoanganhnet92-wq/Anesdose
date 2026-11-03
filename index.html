@@ -346,6 +346,14 @@ nav.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-co
 .pct{flex:1;display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.35}
 .pct small{font-size:12px;color:var(--muted)}
 .pcgo{color:var(--muted);font-size:16px}
+button.pcitem{width:100%;background:none;border:0;border-top:1px solid var(--line);font:inherit;text-align:left;cursor:pointer}
+.pcview{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column}
+.pcview[hidden]{display:none}
+.pcview-bar{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--card)}
+.pcview-title{flex:1;font-weight:650;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcview-open{font-size:13px;color:var(--accent);text-decoration:none;white-space:nowrap}
+.pcview-close{min-width:var(--tap);min-height:var(--tap);border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:16px;cursor:pointer}
+.pcview-frame{flex:1;border:0;width:100%;background:#fff}
 /* Tìm phác đồ */
 .evsearch{position:relative;margin-bottom:10px}
 .evsearch input{width:100%;box-sizing:border-box;min-height:46px;padding:10px 40px 10px 14px;border-radius:12px;
@@ -3832,24 +3840,50 @@ function renderPocus(){
   const hit = it => !q.length || q.every(t => foldVN([it.t, it.d, it.k].join(" ")).includes(" " + t));
   const off = navigator.onLine === false;
   let h = `<div class="banner ${off ? "dg" : "warn"}">${off
-      ? "<b>Đang mất mạng</b> — tài liệu nằm trên Google Drive nên cần có mạng để mở."
-      : "Tài liệu mở bằng Google Drive của bạn — cần có mạng và đăng nhập đúng tài khoản. Người khác chỉ mở được file bạn đã chia sẻ."}</div>
+      ? "<b>Đang mất mạng</b> — tài liệu xem qua Google Drive nên cần có mạng."
+      : "Bấm một mục để <b>xem ngay trong app</b> (khung xem Drive) — không cần tải về. Thư mục đã để chế độ “ai có link đều xem” nên người khác cũng mở được."}</div>
     <div class="evsearch"><input id="pcQ" type="search" placeholder="Tìm: phổi, chèn ép, IVC, thất phải, DVT…" autocomplete="off" value="${PC_Q.replace(/"/g,"&quot;")}"></div>
     <a class="pcfolder" href="https://drive.google.com/drive/folders/${POCUS_FOLDER}" target="_blank" rel="noopener">📁 Mở cả thư mục Pocus trong Drive</a>`;
   let any = false;
   for(const grp of POCUS){
     const its = grp.items.filter(hit); if(!its.length) continue; any = true;
     h += `<div class="card"><h2>${grp.g}</h2>` + its.map(it => `
-      <a class="pcitem" href="https://drive.google.com/file/d/${it.id}/view" target="_blank" rel="noopener">
+      <button type="button" class="pcitem" data-pcid="${it.id}" data-pct="${(it.t||"").replace(/"/g,"&quot;")}">
         <span class="pcn">${it.n != null ? it.n : "•"}</span>
-        <span class="pct"><b>${it.t}</b><small>${it.d}</small></span><span class="pcgo">↗</span></a>`).join("") + `</div>`;
+        <span class="pct"><b>${it.t}</b><small>${it.d}</small></span><span class="pcgo">⤢</span></button>`).join("") + `</div>`;
   }
   if(!any) h += `<div class="card"><div class="note">Không tìm thấy tài liệu phù hợp.</div></div>`;
   h += `<div class="note" style="background:none;border:none;text-align:center">Số thứ tự theo tên file trong thư mục Pocus (không có bài 4 và 11).</div>`;
+  h += `<div id="pcView" class="pcview" hidden>
+      <div class="pcview-bar">
+        <span class="pcview-title"></span>
+        <a class="pcview-open" href="#" target="_blank" rel="noopener">Mở trong Drive ↗</a>
+        <button type="button" class="pcview-close" aria-label="Đóng">✕</button>
+      </div>
+      <iframe class="pcview-frame" src="about:blank" allow="autoplay; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+    </div>`;
   $("p-pocus").innerHTML = h;
   const inp = $("pcQ");
   inp.addEventListener("input", () => { const pos = inp.selectionStart; PC_Q = inp.value; renderPocus(); const i2 = $("pcQ"); i2.focus(); i2.setSelectionRange(pos, pos); });
+  $("p-pocus").querySelectorAll(".pcitem").forEach(btn => btn.addEventListener("click", () => openPcView(btn.dataset.pcid, btn.dataset.pct)));
+  const pvc = $("p-pocus").querySelector(".pcview-close");
+  if(pvc) pvc.addEventListener("click", closePcView);
 }
+function openPcView(id, title){
+  const pv = $("pcView"); if(!pv) return;
+  pv.querySelector(".pcview-title").textContent = title || "Tài liệu";
+  pv.querySelector(".pcview-open").href = "https://drive.google.com/file/d/" + id + "/view";
+  pv.querySelector(".pcview-frame").src = "https://drive.google.com/file/d/" + id + "/preview";
+  pv.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function closePcView(){
+  const pv = $("pcView"); if(!pv) return;
+  pv.hidden = true;
+  const fr = pv.querySelector(".pcview-frame"); if(fr) fr.src = "about:blank";
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if(e.key === "Escape"){ const pv = $("pcView"); if(pv && !pv.hidden) closePcView(); } });
 window.addEventListener("online", () => { if($("p-pocus")) renderPocus(); });
 window.addEventListener("offline", () => { if($("p-pocus")) renderPocus(); });
 
