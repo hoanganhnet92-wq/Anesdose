@@ -1018,11 +1018,12 @@ function raCardHTML(){
         <div><b>Thể tích:</b> ${b.vol} → ${rng(mgLo, mgHi, "mg")} ${d.n} ${c} % · <b style="color:${tone}">${pct} % liều tối đa</b></div>
         <div class="ratip">${b.tip}</div>
         ${RA_HAVE[b.r] ? `<button type="button" class="raview" data-raview="${RA_BLOCKS.indexOf(b)}">🖼 Xem trang ${raRange(b)[0]}–${raRange(b)[1]} có hình <small style="font-weight:600;opacity:.8">(${raSrc(b)})</small></button>` : ""}
+        <button type="button" class="rapreview" data-rapreview="${pdf.id}" data-rapt="${pdf.label}" style="justify-self:start;background:none;border:0;color:var(--accent);font:inherit;cursor:pointer;padding:2px 0;text-align:left">👁 Xem ${pdf.label} trong app (không cần tải)</button>
         <a class="rapdf" href="https://drive.google.com/file/d/${pdf.id}/view#page=${raStart(b)}" target="_blank" rel="noopener">📄 Mở ${pdf.label} trong Drive — trang ${raStart(b)}</a>
       </div></details>`;
   }
   h += `<div class="note">Tóm tắt viết lại từ phần "thông tin nhanh" trong tài liệu của bạn; hình siêu âm và chi tiết kỹ thuật xem trong PDF.
-    File PDF nằm trong Google Drive riêng của bạn — cần đăng nhập đúng tài khoản và có mạng; người khác chỉ mở được nếu bạn chia sẻ.
+    Bấm <b>“Xem … trong app”</b> để xem PDF ngay tại chỗ (khung xem Drive) — không cần tải về; 3 file đã để chế độ “ai có link đều xem” nên người khác cũng mở được (cần có mạng).
     Trình xem Drive trên điện thoại có thể không tự nhảy tới trang — vuốt tới số trang ghi trên nút.</div></div>`;
   return h;
 }
@@ -1035,6 +1036,7 @@ function raBind(){
     if(!confirm("Xoá file này khỏi bộ nhớ máy? (File gốc trong Drive không bị ảnh hưởng)")) return;
     try{ await raDel(b.dataset.radel); }catch(e){} delete RA_DOCS[b.dataset.radel]; await raRefreshHave(); $("raCard").outerHTML = raCardHTML(); raBind(); }));
   $("raCard").querySelectorAll("[data-raview]").forEach(b => b.addEventListener("click", () => raOpenViewer(RA_BLOCKS[+b.dataset.raview])));
+  $("raCard").querySelectorAll("[data-rapreview]").forEach(b => b.addEventListener("click", () => openPcView(b.dataset.rapreview, b.dataset.rapt)));
   $("raCard").querySelectorAll("[data-rareg]").forEach(b => b.addEventListener("click", () => { RA_REG = b.dataset.rareg; $("raCard").outerHTML = raCardHTML(); raBind(); }));
 }
 
@@ -3854,23 +3856,27 @@ function renderPocus(){
   }
   if(!any) h += `<div class="card"><div class="note">Không tìm thấy tài liệu phù hợp.</div></div>`;
   h += `<div class="note" style="background:none;border:none;text-align:center">Số thứ tự theo tên file trong thư mục Pocus (không có bài 4 và 11).</div>`;
-  h += `<div id="pcView" class="pcview" hidden>
-      <div class="pcview-bar">
-        <span class="pcview-title"></span>
-        <a class="pcview-open" href="#" target="_blank" rel="noopener">Mở trong Drive ↗</a>
-        <button type="button" class="pcview-close" aria-label="Đóng">✕</button>
-      </div>
-      <iframe class="pcview-frame" src="about:blank" allow="autoplay; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    </div>`;
   $("p-pocus").innerHTML = h;
   const inp = $("pcQ");
   inp.addEventListener("input", () => { const pos = inp.selectionStart; PC_Q = inp.value; renderPocus(); const i2 = $("pcQ"); i2.focus(); i2.setSelectionRange(pos, pos); });
   $("p-pocus").querySelectorAll(".pcitem").forEach(btn => btn.addEventListener("click", () => openPcView(btn.dataset.pcid, btn.dataset.pct)));
-  const pvc = $("p-pocus").querySelector(".pcview-close");
-  if(pvc) pvc.addEventListener("click", closePcView);
+}
+function ensurePcView(){
+  let pv = document.getElementById("pcView");
+  if(!pv){
+    pv = document.createElement("div");
+    pv.id = "pcView"; pv.className = "pcview"; pv.hidden = true;
+    pv.innerHTML = `<div class="pcview-bar"><span class="pcview-title"></span>`
+      + `<a class="pcview-open" href="#" target="_blank" rel="noopener">Mở trong Drive ↗</a>`
+      + `<button type="button" class="pcview-close" aria-label="Đóng">✕</button></div>`
+      + `<iframe class="pcview-frame" src="about:blank" allow="autoplay; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>`;
+    document.body.appendChild(pv);
+    pv.querySelector(".pcview-close").addEventListener("click", closePcView);
+  }
+  return pv;
 }
 function openPcView(id, title){
-  const pv = $("pcView"); if(!pv) return;
+  const pv = ensurePcView();
   pv.querySelector(".pcview-title").textContent = title || "Tài liệu";
   pv.querySelector(".pcview-open").href = "https://drive.google.com/file/d/" + id + "/view";
   pv.querySelector(".pcview-frame").src = "https://drive.google.com/file/d/" + id + "/preview";
@@ -3878,12 +3884,12 @@ function openPcView(id, title){
   document.body.style.overflow = "hidden";
 }
 function closePcView(){
-  const pv = $("pcView"); if(!pv) return;
+  const pv = document.getElementById("pcView"); if(!pv) return;
   pv.hidden = true;
   const fr = pv.querySelector(".pcview-frame"); if(fr) fr.src = "about:blank";
   document.body.style.overflow = "";
 }
-document.addEventListener("keydown", e => { if(e.key === "Escape"){ const pv = $("pcView"); if(pv && !pv.hidden) closePcView(); } });
+document.addEventListener("keydown", e => { if(e.key === "Escape"){ const pv = document.getElementById("pcView"); if(pv && !pv.hidden) closePcView(); } });
 window.addEventListener("online", () => { if($("p-pocus")) renderPocus(); });
 window.addEventListener("offline", () => { if($("p-pocus")) renderPocus(); });
 
