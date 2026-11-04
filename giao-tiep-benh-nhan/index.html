@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Giao tiếp BN">
+<meta name="theme-color" content="#1473f5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+</head>
+<body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Giao tiếp với bệnh nhân</title>
+<style>
+/* Layout: một cột kiểu app — header trắng, các khối trắng ngăn bằng nền xám ấm, 4 ô tiến độ, thanh hành động cố định dưới đáy. Xanh dương là màu hành động duy nhất. */
+:root{
+  --bg:#f1efe9; --surface:#ffffff; --ink:#1d1b18; --muted:#7a746a; --line:#e6e2d9; --tile:#ecebe5;
+  --blue:#1473f5; --blue-ink:#ffffff; --amber:#d99a0b; --purple:#6b48c9; --green:#1c9a6b; --red:#d6453d;
+  --soft-green:#def3ea; --soft-red:#fbe4e2; --soft-blue:#e3eefe; --shadow:rgba(30,25,15,.28);
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12110e; --surface:#1d1b17; --ink:#f0eadf; --muted:#a39b8c; --line:#34302a; --tile:#2a2722;
+  --blue:#5aa2ff; --blue-ink:#0b1b33; --amber:#f0b73a; --purple:#a58cf0; --green:#4cc79a; --red:#ef7a72;
+  --soft-green:#173428; --soft-red:#3b1f1d; --soft-blue:#16273f; --shadow:rgba(0,0,0,.6); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#12110e; --surface:#1d1b17; --ink:#f0eadf; --muted:#a39b8c; --line:#34302a; --tile:#2a2722;
+  --blue:#5aa2ff; --blue-ink:#0b1b33; --amber:#f0b73a; --purple:#a58cf0; --green:#4cc79a; --red:#ef7a72;
+  --soft-green:#173428; --soft-red:#3b1f1d; --soft-blue:#16273f; --shadow:rgba(0,0,0,.6); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:30}
+[hidden]{display:none!important}
+button{font-family:inherit;color:inherit}
+svg{flex:none}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.shell{max-width:520px;margin:0 auto;min-height:100vh;background:var(--bg)}
+.view{padding-bottom:130px}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);
+  display:flex;align-items:center;gap:14px;padding-top:16px;padding-bottom:16px;box-shadow:0 1px 0 var(--line)}
+.bar h1{margin:0;font-size:1.3rem;font-weight:700;letter-spacing:-.01em;flex:1;min-width:0}
+.ibtn{width:40px;height:40px;border:none;background:none;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;color:var(--ink);margin-left:-8px}
+.ibtn:active{background:var(--tile)}
+.ibtn.r{margin-left:0}
+
+.sec{background:var(--surface);padding-top:22px;padding-bottom:22px;margin-top:10px}
+.sec h2{margin:0 0 12px;font-size:1.28rem;font-weight:700;line-height:1.3;text-wrap:balance}
+.sec p{margin:0;color:var(--ink);font-size:1.02rem;line-height:1.6;max-width:62ch}
+.label{display:block;margin:22px 0 10px;font-size:.84rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tile{background:var(--tile);border-radius:14px;padding:13px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.tile .l{display:flex;align-items:center;gap:8px;min-width:0;font-size:.94rem}
+.tile .v{font-weight:600;font-variant-numeric:tabular-nums}
+.ic-blue{color:var(--blue)}.ic-amber{color:var(--amber)}.ic-purple{color:var(--purple)}.ic-gray{color:var(--muted)}
+
+.linkrow{display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:var(--surface);
+  color:var(--blue);font-weight:600;font-size:1.15rem;text-align:left;padding-top:22px;padding-bottom:22px;margin-top:10px;cursor:pointer}
+.tools{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:18px;padding-bottom:18px}
+.txtbtn{border:none;background:none;color:var(--muted);font-size:.86rem;cursor:pointer;text-decoration:underline;padding:6px 0}
+
+.cta{position:fixed;left:0;right:0;bottom:0;z-index:25;pointer-events:none}
+.cta>div{max-width:520px;margin:0 auto;pointer-events:auto;background:var(--surface);border-radius:22px 22px 0 0;
+  box-shadow:0 -8px 28px -14px var(--shadow);padding-top:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.btn{width:100%;border:none;border-radius:14px;background:var(--blue);color:var(--blue-ink);font-weight:700;font-size:1.12rem;
+  padding:16px;cursor:pointer}
+.btn:active{filter:brightness(.92)}
+.btn.sec2{background:var(--soft-blue);color:var(--blue)}
+.btn:disabled{opacity:.5}
+.btnrow{display:flex;gap:10px}
+.btnrow .btn{flex:1}
+
+/* danh sách thuật ngữ */
+.search{padding-top:12px;padding-bottom:12px;background:var(--surface)}
+.search input{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:1rem;font-family:inherit}
+.search input:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.ghead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-top:20px;padding-bottom:8px;font-weight:700;font-size:.96rem}
+.ghead span{color:var(--muted);font-weight:600;font-size:.84rem;font-variant-numeric:tabular-nums}
+.rows{background:var(--surface)}
+.row{border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.rowhead{display:flex;align-items:center;gap:12px;width:100%;border:none;background:none;text-align:left;padding-top:13px;padding-bottom:13px;cursor:pointer}
+.rt{flex:1;min-width:0;display:flex;flex-direction:column}
+.rt b{font-weight:600;font-size:1rem;overflow-wrap:anywhere}
+.rt small{color:var(--muted);font-size:.88rem;overflow-wrap:anywhere}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--line)}
+.dot.l{background:var(--amber)}.dot.d{background:var(--green)}
+.chev{color:var(--muted);transition:transform .2s}
+.row.open .chev{transform:rotate(90deg)}
+.rowbody{padding-bottom:16px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.ipa{color:var(--muted);font-size:.95rem}
+.exen{font-style:italic;font-size:1rem}
+.exvi{color:var(--muted);font-size:.92rem}
+.spk{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--bg);border-radius:99px;
+  padding:7px 14px;font-size:.88rem;font-weight:600;color:var(--blue);cursor:pointer;margin-top:4px}
+.empty{padding:50px 20px;text-align:center;color:var(--muted)}
+
+/* phiên học */
+.sbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);display:flex;align-items:center;gap:12px;
+  padding-top:14px;padding-bottom:14px;box-shadow:0 1px 0 var(--line)}
+.prog{flex:1;height:8px;border-radius:99px;background:var(--tile);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--blue);border-radius:99px;transition:width .3s}
+.scount{font-size:.84rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.qwrap{padding-top:22px;display:flex;flex-direction:column;gap:14px}
+.qlabel{font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.qlabel.new{color:var(--blue)}
+.qcard{background:var(--surface);border-radius:18px;padding:24px 20px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.qen{font-size:1.7rem;font-weight:700;line-height:1.25;letter-spacing:-.01em;text-wrap:balance;overflow-wrap:anywhere}
+.qvi{font-size:1.3rem;font-weight:600;line-height:1.35;text-wrap:balance}
+.qmean{font-size:1.2rem;font-weight:600;color:var(--blue)}
+.exbox{background:var(--bg);border-radius:12px;padding:12px 14px;width:100%;display:flex;flex-direction:column;gap:3px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:15px 16px;text-align:left;font-size:1.02rem;
+  line-height:1.4;cursor:pointer;overflow-wrap:anywhere}
+.opt:active{background:var(--tile)}
+.opt.ok{border-color:var(--green);background:var(--soft-green)}
+.opt.bad{border-color:var(--red);background:var(--soft-red)}
+.opt:disabled{cursor:default}
+.fb{background:var(--surface);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.fb .head{font-weight:700;font-size:1.05rem}
+.fb .head.ok{color:var(--green)}.fb .head.bad{color:var(--red)}
+
+.sum{padding-top:34px;display:flex;flex-direction:column;gap:18px;align-items:stretch}
+.sum h2{margin:0;font-size:1.6rem;text-align:center}
+.sum p{margin:0;text-align:center;color:var(--muted)}
+.bigpct{font-size:3.2rem;font-weight:700;text-align:center;color:var(--blue);font-variant-numeric:tabular-nums;line-height:1}
+
+/* sheet chọn nội dung */
+.backdrop{position:fixed;inset:0;background:rgba(15,12,8,.5);z-index:40;opacity:0;transition:opacity .25s}
+.backdrop.show{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--surface);border-radius:22px 22px 0 0;max-width:520px;margin:0 auto;
+  max-height:88%;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);
+  padding-top:8px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+.sheet.show{transform:translateY(0)}
+.grip{width:40px;height:4px;border-radius:99px;background:var(--line);margin:8px auto 14px}
+.sheet h3{margin:0 0 4px;font-size:1.2rem}
+.sheet .sub{margin:0 0 14px;color:var(--muted);font-size:.9rem}
+.choices{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.choice{display:flex;justify-content:space-between;align-items:center;gap:10px;border:2px solid var(--line);background:var(--surface);
+  border-radius:12px;padding:12px 14px;font-size:.98rem;cursor:pointer;text-align:left}
+.choice small{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.choice.on{border-color:var(--blue);background:var(--soft-blue)}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:3px;gap:3px;margin-bottom:18px}
+.seg button{flex:1;border:none;background:none;padding:10px 6px;border-radius:9px;font-weight:600;font-size:.94rem;cursor:pointer;color:var(--muted)}
+.seg button.on{background:var(--blue);color:var(--blue-ink)}
+
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+
+<div class="shell">
+
+  <!-- TRANG CHÍNH -->
+  <div class="view" id="v-home">
+    <div class="bar pad">
+      <h1>Khóa học mini</h1>
+      <button class="ibtn r" id="theme" aria-label="Đổi giao diện sáng/tối"></button>
+    </div>
+
+    <div class="sec pad">
+      <h2>Khóa học ngắn là gì?</h2>
+      <p>Khóa học mini gom thuật ngữ và câu mẫu của một chủ đề cụ thể để bạn học tập trung. Học đúng nhóm từ hay dùng nhất giúp vốn từ tăng nhanh hơn học dàn trải.</p>
+    </div>
+
+    <div class="sec pad">
+      <h2>Giao tiếp với bệnh nhân — Cơ bản</h2>
+      <p>Luyện nói chuyện với bệnh nhân bằng tiếng Anh đơn giản: chào hỏi, hỏi triệu chứng và cơn đau, hỏi tiền sử và thuốc, khám bệnh, giải thích bước tiếp theo và dặn dò. Phù hợp người mới bắt đầu.</p>
+
+      <span class="label">Tiến độ của bạn</span>
+      <div class="tiles">
+        <div class="tile"><span class="l ic-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg><span style="color:var(--ink)">Đã học</span></span><span class="v" id="t-learned">0</span></div>
+        <div class="tile"><span class="l ic-amber"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span style="color:var(--ink)">Đang học</span></span><span class="v" id="t-learning">0</span></div>
+        <div class="tile"><span class="l ic-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span style="color:var(--ink)">Độ chính xác</span></span><span class="v" id="t-acc">0%</span></div>
+        <div class="tile"><span class="l ic-gray"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg><span style="color:var(--ink)">Chưa mở</span></span><span class="v" id="t-unopened">120</span></div>
+      </div>
+    </div>
+
+    <button class="linkrow pad" id="open-list">Mở danh sách thuật ngữ
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+
+    <div class="tools pad">
+      <span style="color:var(--muted);font-size:.84rem">Tiến độ lưu trên trình duyệt của bạn</span>
+      <button class="txtbtn" id="reset">Đặt lại tiến độ</button>
+    </div>
+
+    <div class="cta" id="cta-home"><div class="pad"><button class="btn" id="start">Chọn và bắt đầu đào tạo</button></div></div>
+  </div>
+
+  <!-- DANH SÁCH THUẬT NGỮ -->
+  <div class="view" id="v-list" hidden>
+    <div class="bar pad">
+      <button class="ibtn" id="list-back" aria-label="Quay lại"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <h1>Danh sách thuật ngữ</h1>
+    </div>
+    <div class="search pad"><input id="q" type="search" placeholder="Tìm tiếng Anh hoặc tiếng Việt" autocomplete="off"></div>
+    <div id="listbody"></div>
+  </div>
+
+  <!-- PHIÊN HỌC -->
+  <div class="view" id="v-session" hidden>
+    <div class="sbar pad">
+      <button class="ibtn" id="s-close" aria-label="Thoát"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="prog"><i id="s-prog"></i></div>
+      <span class="scount" id="s-count">0/0</span>
+    </div>
+    <div class="qwrap pad" id="s-body"></div>
+    <div class="cta" id="s-cta" hidden><div class="pad"><button class="btn" id="s-next">Tiếp tục</button></div></div>
+  </div>
+
+  <!-- TỔNG KẾT -->
+  <div class="view" id="v-summary" hidden>
+    <div class="bar pad"><h1>Kết quả lượt học</h1></div>
+    <div class="sum pad" id="sum-body"></div>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<div class="sheet pad" id="sheet" hidden>
+  <div class="grip"></div>
+  <h3>Chọn nội dung học</h3>
+  <p class="sub">Mỗi lượt ưu tiên mục đang học dở và mục chưa mở.</p>
+  <div class="choices" id="choices"></div>
+  <div class="seg" id="sizes"><button data-n="10" class="on">10 mục</button><button data-n="20">20 mục</button><button data-n="30">30 mục</button></div>
+  <button class="btn" id="go">Bắt đầu</button>
+</div>
+
+<script>
+(function(){
+/* ===== DỮ LIỆU: 120 mục (60 từ/cụm từ + 60 câu mẫu), 6 nhóm ===== */
+var GROUPS=["Chào hỏi & làm quen","Hỏi về triệu chứng","Hỏi về cơn đau","Tiền sử, thuốc & gây mê","Khám & thủ thuật","Giải thích & dặn dò"];
+var RAW=[];
+function T(g,e,ipa,m,ex,exm){RAW.push([g,'T',e,ipa,m,ex,exm]);}
+function P(g,e,m,ex,exm){RAW.push([g,'P',e,'',m,ex,exm]);}
+
+/* Nhóm 0: Chào hỏi & làm quen */
+T(0,"patient","/ˈpeɪʃənt/","bệnh nhân","The patient is waiting in room 3.","Bệnh nhân đang chờ ở phòng 3.");
+T(0,"appointment","/əˈpɔɪntmənt/","cuộc hẹn khám","Do you have an appointment today?","Hôm nay anh/chị có hẹn khám không?");
+T(0,"date of birth","/deɪt əv bɜːrθ/","ngày sinh","Please tell me your date of birth.","Xin cho tôi biết ngày sinh của anh/chị.");
+T(0,"nurse","/nɜːrs/","y tá, điều dưỡng","The nurse will check your blood pressure.","Y tá sẽ đo huyết áp cho anh/chị.");
+T(0,"relative","/ˈrelətɪv/","người thân","Is a relative with you today?","Hôm nay có người thân đi cùng anh/chị không?");
+T(0,"interpreter","/ɪnˈtɜːrprətər/","phiên dịch viên","Do you need an interpreter?","Anh/chị có cần phiên dịch viên không?");
+T(0,"waiting room","/ˈweɪtɪŋ ruːm/","phòng chờ","Please wait in the waiting room.","Xin chờ ở phòng chờ.");
+T(0,"consent form","/kənˈsent fɔːrm/","phiếu đồng ý (cam kết)","Please sign this consent form.","Xin ký vào phiếu đồng ý này.");
+T(0,"ward","/wɔːrd/","khoa, buồng bệnh","You will stay in this ward tonight.","Đêm nay anh/chị sẽ nằm ở buồng bệnh này.");
+T(0,"anesthesiologist","/ˌænəsˌθiːziˈɑːlədʒɪst/","bác sĩ gây mê","I am your anesthesiologist.","Tôi là bác sĩ gây mê của anh/chị.");
+P(0,"Good morning. How are you today?","Chào buổi sáng. Hôm nay anh/chị thế nào?","I am a little nervous.","Tôi hơi lo lắng.");
+P(0,"My name is Dr. Anh.","Tôi là bác sĩ Anh.","Nice to meet you, doctor.","Rất vui được gặp bác sĩ.");
+P(0,"What is your full name?","Họ và tên đầy đủ của anh/chị là gì?","My name is Nguyen Van An.","Tên tôi là Nguyễn Văn An.");
+P(0,"How old are you?","Anh/chị bao nhiêu tuổi?","I am sixty-two years old.","Tôi sáu mươi hai tuổi.");
+P(0,"Please take a seat.","Mời anh/chị ngồi.","Thank you, doctor.","Cảm ơn bác sĩ.");
+P(0,"What brings you in today?","Hôm nay anh/chị đến khám vì lý do gì?","I have a bad stomachache.","Tôi bị đau bụng nhiều.");
+P(0,"How can I help you?","Tôi có thể giúp gì cho anh/chị?","I have had a fever since yesterday.","Tôi bị sốt từ hôm qua.");
+P(0,"Can you hear me clearly?","Anh/chị nghe tôi nói rõ không?","Yes, I can hear you.","Vâng, tôi nghe rõ.");
+P(0,"Do you understand?","Anh/chị có hiểu không?","Could you speak more slowly, please?","Bác sĩ nói chậm hơn được không?");
+P(0,"Do you have any questions?","Anh/chị có câu hỏi nào không?","Yes, when can I go home?","Có, khi nào tôi về nhà được?");
+
+/* Nhóm 1: Hỏi về triệu chứng */
+T(1,"fever","/ˈfiːvər/","sốt","She has had a high fever for two days.","Cô ấy bị sốt cao hai ngày rồi.");
+T(1,"cough","/kɔːf/","ho","I have had a dry cough for a week.","Tôi bị ho khan một tuần rồi.");
+T(1,"headache","/ˈhedeɪk/","đau đầu","I get a headache every morning.","Sáng nào tôi cũng bị đau đầu.");
+T(1,"nausea","/ˈnɔːziə/","buồn nôn","The medicine can cause nausea.","Thuốc này có thể gây buồn nôn.");
+T(1,"vomit","/ˈvɑːmɪt/","nôn","He vomited twice last night.","Đêm qua anh ấy nôn hai lần.");
+T(1,"dizzy","/ˈdɪzi/","chóng mặt","I feel dizzy when I stand up.","Tôi thấy chóng mặt khi đứng dậy.");
+T(1,"shortness of breath","/ˈʃɔːrtnəs əv breθ/","khó thở","She has shortness of breath at night.","Cô ấy khó thở vào ban đêm.");
+T(1,"chest pain","/tʃest peɪn/","đau ngực","Chest pain needs a check right away.","Đau ngực cần được kiểm tra ngay.");
+T(1,"diarrhea","/ˌdaɪəˈriːə/","tiêu chảy","He has had diarrhea since Monday.","Anh ấy bị tiêu chảy từ thứ Hai.");
+T(1,"tired","/ˈtaɪərd/","mệt mỏi","I feel very tired all the time.","Tôi lúc nào cũng thấy rất mệt.");
+T(1,"swelling","/ˈswelɪŋ/","sưng, phù","There is swelling in his left leg.","Chân trái của anh ấy bị sưng.");
+T(1,"rash","/ræʃ/","phát ban","A red rash appeared on her arm.","Một vết ban đỏ xuất hiện trên tay cô ấy.");
+P(1,"What symptoms do you have?","Anh/chị có triệu chứng gì?","I have a cough and a sore throat.","Tôi bị ho và đau họng.");
+P(1,"How long have you had this?","Anh/chị bị như vậy bao lâu rồi?","About three days.","Khoảng ba ngày.");
+P(1,"Did it start suddenly?","Nó bắt đầu đột ngột phải không?","No, it started slowly.","Không, nó bắt đầu từ từ.");
+P(1,"Have you had a fever?","Anh/chị có bị sốt không?","Yes, last night I felt very hot.","Có, tối qua tôi thấy rất nóng.");
+P(1,"Do you feel dizzy?","Anh/chị có thấy chóng mặt không?","A little, when I stand up.","Một chút, khi tôi đứng dậy.");
+P(1,"Are you having trouble breathing?","Anh/chị có khó thở không?","Yes, especially when I walk.","Có, nhất là khi tôi đi bộ.");
+P(1,"Have you been coughing?","Anh/chị có bị ho không?","Yes, mostly at night.","Có, chủ yếu về đêm.");
+P(1,"Have you vomited?","Anh/chị có nôn không?","Yes, two times today.","Có, hai lần hôm nay.");
+
+/* Nhóm 2: Hỏi về cơn đau */
+T(2,"pain","/peɪn/","đau","Tell me where you feel pain.","Hãy cho tôi biết anh/chị đau ở đâu.");
+T(2,"sharp","/ʃɑːrp/","nhói, sắc","It is a sharp pain.","Đó là cơn đau nhói.");
+T(2,"dull","/dʌl/","âm ỉ","I have a dull pain in my back.","Tôi bị đau âm ỉ ở lưng.");
+T(2,"burning","/ˈbɜːrnɪŋ/","rát bỏng","I feel a burning pain in my chest.","Tôi thấy rát bỏng ở ngực.");
+T(2,"cramp","/kræmp/","chuột rút, đau quặn","I have a cramp in my leg.","Tôi bị chuột rút ở chân.");
+T(2,"throbbing","/ˈθrɑːbɪŋ/","đau giật theo nhịp","The headache is throbbing.","Cơn đau đầu giật từng nhịp.");
+T(2,"stomachache","/ˈstʌməkeɪk/","đau bụng","She has a stomachache after meals.","Cô ấy đau bụng sau bữa ăn.");
+T(2,"back pain","/bæk peɪn/","đau lưng","Back pain is very common.","Đau lưng rất thường gặp.");
+T(2,"mild","/maɪld/","nhẹ","The pain is mild today.","Hôm nay cơn đau nhẹ.");
+T(2,"severe","/sɪˈvɪr/","nặng, dữ dội","He has severe pain in his belly.","Anh ấy đau bụng dữ dội.");
+P(2,"Where does it hurt?","Anh/chị đau ở đâu?","It hurts here, on the right side.","Đau ở đây, bên phải.");
+P(2,"Can you point to the pain?","Anh/chị chỉ chỗ đau được không?","Right here, below my ribs.","Ngay đây, dưới sườn.");
+P(2,"On a scale of 0 to 10, how bad is the pain?","Theo thang điểm 0 đến 10, cơn đau của anh/chị ở mức nào?","About seven.","Khoảng bảy.");
+P(2,"Is the pain constant, or does it come and go?","Cơn đau liên tục hay lúc có lúc không?","It comes and goes.","Lúc có lúc không.");
+P(2,"Does the pain move to another place?","Cơn đau có lan sang chỗ khác không?","Yes, it goes to my back.","Có, nó lan ra lưng.");
+P(2,"What makes the pain better?","Điều gì làm cơn đau đỡ hơn?","Rest helps a little.","Nghỉ ngơi đỡ được một chút.");
+P(2,"What makes the pain worse?","Điều gì làm cơn đau tệ hơn?","It gets worse when I move.","Đau hơn khi tôi cử động.");
+P(2,"Does it hurt when I press here?","Tôi ấn vào đây thì anh/chị có đau không?","Yes, that hurts a lot.","Có, đau lắm.");
+P(2,"When did the pain start?","Cơn đau bắt đầu khi nào?","It started this morning.","Nó bắt đầu từ sáng nay.");
+P(2,"Do you need pain medicine?","Anh/chị có cần thuốc giảm đau không?","Yes, please.","Có, làm ơn.");
+
+/* Nhóm 3: Tiền sử, thuốc & gây mê */
+T(3,"allergy","/ˈælərdʒi/","dị ứng","She has an allergy to penicillin.","Cô ấy dị ứng với penicillin.");
+T(3,"medication","/ˌmedɪˈkeɪʃn/","thuốc, việc dùng thuốc","Bring all your medication to the clinic.","Hãy mang tất cả thuốc đến phòng khám.");
+T(3,"blood pressure","/blʌd ˈpreʃər/","huyết áp","Your blood pressure is a little high.","Huyết áp của anh/chị hơi cao.");
+T(3,"diabetes","/ˌdaɪəˈbiːtiːz/","đái tháo đường","He has had diabetes for ten years.","Ông ấy bị đái tháo đường mười năm rồi.");
+T(3,"surgery","/ˈsɜːrdʒəri/","phẫu thuật","She had surgery on her knee last year.","Năm ngoái cô ấy mổ đầu gối.");
+T(3,"pregnant","/ˈpregnənt/","mang thai","Tell us if you might be pregnant.","Hãy báo cho chúng tôi nếu có thể anh/chị đang mang thai.");
+T(3,"smoke","/smoʊk/","hút thuốc","Do not smoke before the operation.","Đừng hút thuốc trước ca mổ.");
+T(3,"heart disease","/hɑːrt dɪˈziːz/","bệnh tim","His father had heart disease.","Bố anh ấy bị bệnh tim.");
+T(3,"fasting","/ˈfæstɪŋ/","nhịn ăn uống (trước mổ)","You must keep fasting until the operation.","Anh/chị phải nhịn ăn uống cho đến khi mổ.");
+T(3,"anesthesia","/ˌænəsˈθiːʒə/","gây mê, gây tê","You will have general anesthesia.","Anh/chị sẽ được gây mê toàn thân.");
+P(3,"Are you allergic to any medicine?","Anh/chị có dị ứng thuốc nào không?","Yes, I am allergic to penicillin.","Có, tôi dị ứng với penicillin.");
+P(3,"Are you taking any medicine now?","Hiện anh/chị đang dùng thuốc gì không?","I take a pill for my blood pressure.","Tôi uống một viên thuốc huyết áp.");
+P(3,"Have you had surgery before?","Anh/chị đã từng phẫu thuật chưa?","Yes, I had my appendix removed.","Có, tôi đã mổ ruột thừa.");
+P(3,"Do you have high blood pressure or diabetes?","Anh/chị có bị cao huyết áp hoặc đái tháo đường không?","I have high blood pressure.","Tôi bị cao huyết áp.");
+P(3,"When did you last eat or drink?","Lần cuối anh/chị ăn hoặc uống là khi nào?","I had water at six this morning.","Tôi uống nước lúc sáu giờ sáng nay.");
+P(3,"Do you smoke or drink alcohol?","Anh/chị có hút thuốc hoặc uống rượu không?","I stopped smoking two years ago.","Tôi bỏ thuốc hai năm rồi.");
+P(3,"Are you pregnant?","Chị có đang mang thai không?","No, I am not.","Không, tôi không.");
+P(3,"Have you had a problem with anesthesia before?","Trước đây anh/chị từng gặp vấn đề khi gây mê chưa?","No, I have never had a problem.","Chưa, tôi chưa từng gặp vấn đề.");
+P(3,"Do you have any loose teeth or dentures?","Anh/chị có răng lung lay hoặc răng giả không?","I have one false tooth.","Tôi có một chiếc răng giả.");
+P(3,"Do you have any other health problems?","Anh/chị còn vấn đề sức khỏe nào khác không?","No, only the stomach pain.","Không, chỉ có đau bụng.");
+
+/* Nhóm 4: Khám & thủ thuật */
+T(4,"stethoscope","/ˈsteθəskoʊp/","ống nghe","The doctor listens with a stethoscope.","Bác sĩ nghe bằng ống nghe.");
+T(4,"thermometer","/θərˈmɑːmɪtər/","nhiệt kế","Put the thermometer under your arm.","Hãy đặt nhiệt kế dưới nách.");
+T(4,"injection","/ɪnˈdʒekʃn/","tiêm, mũi tiêm","You need an injection.","Anh/chị cần tiêm một mũi.");
+T(4,"blood test","/blʌd test/","xét nghiệm máu","We will do a blood test first.","Chúng tôi sẽ xét nghiệm máu trước.");
+T(4,"X-ray","/ˈeks reɪ/","chụp X-quang","You need an X-ray of your chest.","Anh/chị cần chụp X-quang ngực.");
+T(4,"CT scan","/ˌsiː ˈtiː skæn/","chụp cắt lớp vi tính","The CT scan takes ten minutes.","Chụp cắt lớp mất mười phút.");
+T(4,"ultrasound","/ˈʌltrəsaʊnd/","siêu âm","We will do an ultrasound of your belly.","Chúng tôi sẽ siêu âm bụng cho anh/chị.");
+T(4,"IV line","/ˌaɪ ˈviː laɪn/","đường truyền tĩnh mạch","The nurse will put in an IV line.","Y tá sẽ đặt đường truyền tĩnh mạch.");
+T(4,"oxygen mask","/ˈɑːksɪdʒən mæsk/","mặt nạ oxy","Wear this oxygen mask, please.","Xin hãy đeo mặt nạ oxy này.");
+T(4,"pulse","/pʌls/","mạch","Your pulse is normal.","Mạch của anh/chị bình thường.");
+P(4,"I am going to check your blood pressure.","Tôi sẽ đo huyết áp cho anh/chị.","Okay, doctor.","Vâng, bác sĩ.");
+P(4,"Please take a deep breath.","Xin hãy hít sâu.","Like this?","Như thế này phải không?");
+P(4,"Breathe in, and breathe out.","Hít vào, rồi thở ra.","Is that okay?","Như vậy được chưa?");
+P(4,"Open your mouth, please.","Xin hãy há miệng.","Do you see something?","Bác sĩ thấy gì không?");
+P(4,"Please lie down on the bed.","Xin hãy nằm xuống giường.","Should I take off my shoes?","Tôi có cần cởi giày không?");
+P(4,"Roll up your sleeve, please.","Xin hãy xắn tay áo lên.","Which arm?","Tay nào ạ?");
+P(4,"You will feel a small pinch.","Anh/chị sẽ thấy hơi nhói một chút.","Okay, I am ready.","Vâng, tôi sẵn sàng.");
+P(4,"Please stay still.","Xin hãy nằm yên.","Okay, I will not move.","Vâng, tôi sẽ không cử động.");
+P(4,"Does this hurt?","Chỗ này có đau không?","No, that is fine.","Không, ổn.");
+P(4,"I am going to listen to your heart and lungs.","Tôi sẽ nghe tim và phổi của anh/chị.","Do I need to take off my shirt?","Tôi có cần cởi áo không?");
+
+/* Nhóm 5: Giải thích & dặn dò */
+T(5,"follow-up","/ˈfɑːloʊ ʌp/","tái khám","You need a follow-up visit next week.","Anh/chị cần tái khám vào tuần sau.");
+T(5,"prescription","/prɪˈskrɪpʃn/","đơn thuốc","Here is your prescription.","Đây là đơn thuốc của anh/chị.");
+T(5,"side effect","/ˈsaɪd ɪfekt/","tác dụng phụ","A common side effect is sleepiness.","Tác dụng phụ thường gặp là buồn ngủ.");
+T(5,"discharge","/dɪsˈtʃɑːrdʒ/","cho xuất viện","We can discharge you tomorrow.","Ngày mai chúng tôi có thể cho anh/chị xuất viện.");
+T(5,"rest","/rest/","nghỉ ngơi","You need to rest for three days.","Anh/chị cần nghỉ ngơi ba ngày.");
+T(5,"recover","/rɪˈkʌvər/","hồi phục","You will recover in a few weeks.","Anh/chị sẽ hồi phục sau vài tuần.");
+T(5,"emergency","/ɪˈmɜːrdʒənsi/","cấp cứu","Go to the emergency room if you cannot breathe.","Hãy đến phòng cấp cứu nếu anh/chị không thở được.");
+T(5,"test result","/test rɪˈzʌlt/","kết quả xét nghiệm","Your test results are normal.","Kết quả xét nghiệm của anh/chị bình thường.");
+T(5,"operation","/ˌɑːpəˈreɪʃn/","ca mổ","The operation takes about one hour.","Ca mổ mất khoảng một giờ.");
+T(5,"recovery room","/rɪˈkʌvəri ruːm/","phòng hồi tỉnh","You will wake up in the recovery room.","Anh/chị sẽ tỉnh dậy ở phòng hồi tỉnh.");
+P(5,"You need some tests.","Anh/chị cần làm một số xét nghiệm.","What kind of tests?","Xét nghiệm gì vậy ạ?");
+P(5,"The results will be ready tomorrow.","Kết quả sẽ có vào ngày mai.","Can my son get them for me?","Con trai tôi lấy giúp được không?");
+P(5,"Take this medicine twice a day after meals.","Uống thuốc này hai lần mỗi ngày sau bữa ăn.","For how many days?","Uống trong bao nhiêu ngày?");
+P(5,"Drink plenty of water.","Hãy uống nhiều nước.","Is juice okay?","Nước ép được không?");
+P(5,"Do not eat or drink before the operation.","Đừng ăn hoặc uống trước ca mổ.","Not even water?","Cả nước cũng không ạ?");
+P(5,"I will give you medicine to make you sleep.","Tôi sẽ cho thuốc để anh/chị ngủ.","Will I feel any pain?","Tôi có bị đau không?");
+P(5,"Come back if the pain gets worse.","Hãy quay lại nếu cơn đau nặng hơn.","Yes, I will.","Vâng, tôi sẽ quay lại.");
+P(5,"Please come back in one week.","Xin hãy quay lại sau một tuần.","Do I need to make an appointment?","Tôi có cần đặt lịch hẹn không?");
+P(5,"Call us if you have a high fever.","Hãy gọi cho chúng tôi nếu anh/chị sốt cao.","What number should I call?","Tôi gọi số nào?");
+P(5,"Do you understand what I have explained?","Anh/chị có hiểu những gì tôi đã giải thích không?","Yes, thank you, doctor.","Vâng, cảm ơn bác sĩ.");
+
+var ITEMS=RAW.map(function(r,i){return {id:i,g:r[0],t:r[1],e:r[2],ipa:r[3],m:r[4],ex:r[5],exm:r[6]};});
+
+/* ===== TRẠNG THÁI ===== */
+var KEY="gtbn_progress_v1", prog={};
+try{prog=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){prog={};}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(prog));}catch(e){}}
+function st(i){return prog[i]||(prog[i]={s:0,k:0,c:0,a:0});}
+function sOf(i){var s=prog[i];return s?s.s:0;}
+function stats(){var l=0,n=0,u=0,c=0,a=0;
+  ITEMS.forEach(function(it){var s=prog[it.id];var v=s?s.s:0;if(v===2)l++;else if(v===1)n++;else u++;if(s){c+=s.c;a+=s.a;}});
+  return {learned:l,learning:n,unopened:u,acc:a?Math.round(c/a*100):0};}
+
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* ===== PHÁT ÂM ===== */
+function ttsOk(){return ('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window);}
+function fallbackListen(t){try{window.open("https://youglish.com/pronounce/"+encodeURIComponent(t)+"/english/us","_blank","noopener");}catch(e){}}
+function doSpeak(text){
+  if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();
+  try{speechSynthesis.resume();}catch(e){}
+  var u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.9;
+  var vs=speechSynthesis.getVoices()||[];
+  var v=vs.filter(function(x){return /en[-_]US/i.test(x.lang);})[0]||vs.filter(function(x){return /^en/i.test(x.lang);})[0];
+  if(v)u.voice=v;
+  var started=false;u.onstart=function(){started=true;};
+  u.onerror=function(){fallbackListen(text);};
+  speechSynthesis.speak(u);
+  setTimeout(function(){if(!started&&!speechSynthesis.speaking)fallbackListen(text);},1500);
+}
+function speak(text){
+  if(!ttsOk()){fallbackListen(text);return;}
+  try{var vs=speechSynthesis.getVoices()||[];
+    if(!vs.length){var done=false,once=function(){if(done)return;done=true;doSpeak(text);};speechSynthesis.onvoiceschanged=once;setTimeout(once,600);}
+    else doSpeak(text);
+  }catch(e){fallbackListen(text);}
+}
+var SPK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>';
+
+/* ===== ĐIỀU HƯỚNG ===== */
+function show(name){
+  ['home','list','session','summary'].forEach(function(v){$('v-'+v).hidden=(v!==name);});
+  window.scrollTo(0,0);
+}
+
+/* ===== TRANG CHÍNH ===== */
+function renderHome(){
+  var s=stats();
+  $('t-learned').textContent=s.learned;$('t-learning').textContent=s.learning;
+  $('t-acc').textContent=s.acc+'%';$('t-unopened').textContent=s.unopened;
+}
+
+/* ===== DANH SÁCH THUẬT NGỮ ===== */
+function renderList(q){
+  q=(q||'').trim().toLowerCase();
+  var html='';
+  GROUPS.forEach(function(gn,gi){
+    var all=ITEMS.filter(function(it){return it.g===gi;});
+    var done=all.filter(function(it){return sOf(it.id)===2;}).length;
+    var items=all.filter(function(it){return !q||it.e.toLowerCase().indexOf(q)>-1||it.m.toLowerCase().indexOf(q)>-1;});
+    if(!items.length)return;
+    html+='<div class="ghead pad"><span style="color:var(--ink);font-size:.96rem">'+esc(gn)+'</span><span>'+done+'/'+all.length+'</span></div><div class="rows">';
+    items.forEach(function(it){
+      var v=sOf(it.id),cls=v===2?'d':(v===1?'l':'u');
+      html+='<div class="row" data-id="'+it.id+'"><button class="rowhead pad" aria-expanded="false"><i class="dot '+cls+'"></i>'+
+        '<span class="rt"><b>'+esc(it.e)+'</b><small>'+esc(it.m)+'</small></span>'+
+        '<svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>'+
+        '<div class="rowbody pad" hidden>'+(it.ipa?'<span class="ipa">'+esc(it.ipa)+'</span>':'')+
+        '<span class="exen">'+esc(it.ex)+'</span><span class="exvi">'+esc(it.exm)+'</span>'+
+        '<button class="spk" data-say="'+esc(it.e)+'">'+SPK+' Nghe '+(it.t==='P'?'câu':'từ')+'</button>'+
+        '<button class="spk" data-say="'+esc(it.ex)+'">'+SPK+' Nghe ví dụ</button></div></div>';
+    });
+    html+='</div>';
+  });
+  $('listbody').innerHTML=html||'<div class="empty">Không tìm thấy mục nào.</div>';
+}
+$('listbody').addEventListener('click',function(e){
+  var sp=e.target.closest('.spk');
+  if(sp){speak(sp.getAttribute('data-say'));return;}
+  var h=e.target.closest('.rowhead');
+  if(h){var row=h.parentNode,body=row.querySelector('.rowbody');var open=body.hidden;body.hidden=!open;row.classList.toggle('open',open);h.setAttribute('aria-expanded',open);}
+});
+$('q').addEventListener('input',function(){renderList(this.value);});
+$('open-list').addEventListener('click',function(){$('q').value='';renderList('');show('list');});
+$('list-back').addEventListener('click',function(){renderHome();show('home');});
+
+/* ===== SHEET CHỌN NỘI DUNG ===== */
+var scope='all',size=10;
+var sheet=$('sheet'),backdrop=$('backdrop');
+function renderChoices(){
+  var s=stats();
+  var html='<button class="choice'+(scope==='all'?' on':'')+'" data-g="all"><span>Tất cả các nhóm</span><small>'+s.learned+'/'+ITEMS.length+' đã học</small></button>';
+  GROUPS.forEach(function(gn,gi){
+    var all=ITEMS.filter(function(it){return it.g===gi;});
+    var d=all.filter(function(it){return sOf(it.id)===2;}).length;
+    html+='<button class="choice'+(scope===gi?' on':'')+'" data-g="'+gi+'"><span>'+esc(gn)+'</span><small>'+d+'/'+all.length+'</small></button>';
+  });
+  $('choices').innerHTML=html;
+}
+function openSheet(){renderChoices();backdrop.hidden=false;sheet.hidden=false;
+  requestAnimationFrame(function(){backdrop.classList.add('show');sheet.classList.add('show');});}
+function closeSheet(){backdrop.classList.remove('show');sheet.classList.remove('show');
+  setTimeout(function(){backdrop.hidden=true;sheet.hidden=true;},300);}
+$('start').addEventListener('click',openSheet);
+backdrop.addEventListener('click',closeSheet);
+$('choices').addEventListener('click',function(e){var b=e.target.closest('.choice');if(!b)return;
+  var g=b.getAttribute('data-g');scope=(g==='all')?'all':parseInt(g,10);renderChoices();});
+$('sizes').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  size=parseInt(b.getAttribute('data-n'),10);
+  Array.prototype.forEach.call($('sizes').children,function(x){x.classList.toggle('on',x===b);});});
+$('go').addEventListener('click',function(){closeSheet();startSession(scope,size);});
+
+/* ===== PHIÊN HỌC ===== */
+var S=null;
+function startSession(sc,n){
+  var pool=ITEMS.filter(function(it){return sc==='all'||it.g===sc;});
+  var learning=shuffle(pool.filter(function(it){return sOf(it.id)===1;}));
+  var fresh=pool.filter(function(it){return sOf(it.id)===0;});
+  var done=shuffle(pool.filter(function(it){return sOf(it.id)===2;}));
+  var takeL=Math.min(learning.length,Math.ceil(n/2));
+  var picked=learning.slice(0,takeL);
+  picked=picked.concat(fresh.slice(0,n-picked.length));
+  if(picked.length<n)picked=picked.concat(learning.slice(takeL,takeL+n-picked.length));
+  if(picked.length<n)picked=picked.concat(done.slice(0,n-picked.length));
+  if(!picked.length)return;
+  picked=shuffle(picked);
+  S={queue:picked.map(function(it){return {id:it.id,req:0};}),total:picked.length,finished:0,
+     answered:0,correct:0,newLearned:0,introduced:{},answeredNow:false};
+  show('session');nextStep();
+}
+function setProg(){
+  $('s-prog').style.width=(S.total?S.finished/S.total*100:0)+'%';
+  $('s-count').textContent=Math.min(S.finished+1,S.total)+'/'+S.total;
+}
+function nextStep(){
+  S.answeredNow=false;$('s-cta').hidden=true;
+  if(!S.queue.length){finish();return;}
+  setProg();
+  var q=S.queue[0],it=ITEMS[q.id];
+  if(sOf(it.id)===0&&!S.introduced[it.id]){renderIntro(it);return;}
+  renderQuiz(it,q);
+}
+function renderIntro(it){
+  $('s-body').innerHTML=
+    '<span class="qlabel new">'+(it.t==='P'?'Câu mới':'Từ mới')+'</span>'+
+    '<div class="qcard"><div class="qen">'+esc(it.e)+'</div>'+(it.ipa?'<span class="ipa">'+esc(it.ipa)+'</span>':'')+
+    '<div class="qmean">'+esc(it.m)+'</div>'+
+    '<button class="spk" data-say="'+esc(it.e)+'">'+SPK+' Nghe</button>'+
+    '<div class="exbox"><span class="qlabel">Ví dụ</span><span class="exen">'+esc(it.ex)+'</span><span class="exvi">'+esc(it.exm)+'</span>'+
+    '<button class="spk" data-say="'+esc(it.ex)+'">'+SPK+' Nghe ví dụ</button></div></div>';
+  $('s-next').textContent='Đã hiểu, làm bài';
+  $('s-next').onclick=function(){S.introduced[it.id]=true;var s=st(it.id);if(s.s===0)s.s=1;save();
+    renderQuiz(it,S.queue[0]);$('s-cta').hidden=true;window.scrollTo(0,0);};
+  $('s-cta').hidden=false;
+  speak(it.e);
+}
+function pickOptions(it,field){
+  var pool=ITEMS.filter(function(x){return x.t===it.t&&x.id!==it.id&&x[field]!==it[field];});
+  var seen={};seen[it[field]]=1;var out=[];
+  shuffle(pool).forEach(function(x){if(out.length<3&&!seen[x[field]]){seen[x[field]]=1;out.push(x[field]);}});
+  return shuffle(out.concat([it[field]]));
+}
+function renderQuiz(it,q){
+  var types=['en2vi','vi2en'];
+  if(ttsOk()&&(speechSynthesis.getVoices()||[]).length&&q.req>0)types.push('listen');
+  var type=types[Math.floor(Math.random()*types.length)];
+  var field=(type==='vi2en')?'e':'m';
+  var opts=pickOptions(it,field);
+  var label,prompt;
+  if(type==='en2vi'){label='Chọn nghĩa đúng';prompt='<div class="qen">'+esc(it.e)+'</div>'+(it.ipa?'<span class="ipa">'+esc(it.ipa)+'</span>':'')+
+    '<button class="spk" data-say="'+esc(it.e)+'">'+SPK+' Nghe</button>';}
+  else if(type==='vi2en'){label='Chọn cách nói tiếng Anh';prompt='<div class="qvi">'+esc(it.m)+'</div>';}
+  else{label='Nghe và chọn nghĩa đúng';prompt='<button class="spk" data-say="'+esc(it.e)+'">'+SPK+' Nghe lại</button>'+
+    '<button class="txtbtn" id="reveal">Hiện chữ</button><div class="qen" id="revtxt" hidden>'+esc(it.e)+'</div>';}
+  $('s-body').innerHTML='<span class="qlabel">'+label+'</span><div class="qcard">'+prompt+'</div>'+
+    '<div class="opts" id="opts">'+opts.map(function(o){return '<button class="opt" data-v="'+esc(o)+'">'+esc(o)+'</button>';}).join('')+'</div>'+
+    '<div id="fb"></div>';
+  var rv=$('reveal');if(rv)rv.onclick=function(){$('revtxt').hidden=false;rv.hidden=true;};
+  if(type==='listen')speak(it.e);
+  $('opts').onclick=function(e){
+    var b=e.target.closest('.opt');if(!b||S.answeredNow)return;
+    S.answeredNow=true;
+    answer(it,q,b.getAttribute('data-v')===it[field],b,field);
+  };
+}
+function answer(it,q,ok,btn,field){
+  var s=st(it.id);s.a++;S.answered++;
+  if(s.s===0)s.s=1;
+  if(ok){s.c++;s.k++;S.correct++;}else{s.k=0;}
+  var mastered=false;
+  if(ok&&s.k>=2){if(s.s!==2)S.newLearned++;s.s=2;mastered=true;}
+  save();
+  Array.prototype.forEach.call(document.querySelectorAll('#opts .opt'),function(b){
+    b.disabled=true;if(b.getAttribute('data-v')===it[field])b.classList.add('ok');
+  });
+  if(!ok)btn.classList.add('bad');
+  $('revtxt')&&($('revtxt').hidden=false);
+  $('fb').innerHTML='<div class="fb"><span class="head '+(ok?'ok':'bad')+'">'+(ok?(mastered?'Chính xác. Đã thuộc mục này!':'Chính xác!'):'Chưa đúng')+'</span>'+
+    '<b>'+esc(it.e)+'</b><span>'+esc(it.m)+'</span>'+(it.ipa?'<span class="ipa">'+esc(it.ipa)+'</span>':'')+
+    '<span class="exen">'+esc(it.ex)+'</span><span class="exvi">'+esc(it.exm)+'</span>'+
+    '<button class="spk" data-say="'+esc(it.ex)+'">'+SPK+' Nghe cả câu</button></div>';
+  S.queue.shift();
+  if(!mastered&&q.req<3){
+    var item={id:it.id,req:q.req+1};
+    if(ok)S.queue.push(item);else S.queue.splice(Math.min(3,S.queue.length),0,item);
+  }else S.finished++;
+  $('s-next').textContent=(S.queue.length?'Tiếp tục':'Xem kết quả');
+  $('s-next').onclick=nextStep;
+  $('s-cta').hidden=false;
+  setProg();
+  setTimeout(function(){var f=$('fb');if(f&&f.scrollIntoView)f.scrollIntoView({block:'nearest',behavior:'smooth'});},60);
+}
+$('s-body').addEventListener('click',function(e){var sp=e.target.closest('.spk');if(sp)speak(sp.getAttribute('data-say'));});
+$('s-close').addEventListener('click',function(){S=null;renderHome();show('home');});
+
+function finish(){
+  var acc=S.answered?Math.round(S.correct/S.answered*100):0;
+  var st2=stats();
+  $('sum-body').innerHTML='<h2>Hoàn thành lượt học</h2><div class="bigpct">'+acc+'%</div><p>'+S.correct+' đúng trên '+S.answered+' câu trả lời</p>'+
+    '<div class="tiles"><div class="tile"><span class="l">Mục mới thuộc</span><span class="v">'+S.newLearned+'</span></div>'+
+    '<div class="tile"><span class="l">Tổng đã học</span><span class="v">'+st2.learned+'/'+ITEMS.length+'</span></div></div>'+
+    '<div class="btnrow" style="margin-top:6px"><button class="btn sec2" id="sum-home">Về trang chính</button><button class="btn" id="sum-more">Học tiếp</button></div>';
+  $('sum-home').onclick=function(){S=null;renderHome();show('home');};
+  $('sum-more').onclick=function(){S=null;renderHome();show('home');openSheet();};
+  $('s-cta').hidden=true;show('summary');
+}
+
+/* ===== ĐẶT LẠI & GIAO DIỆN ===== */
+var armed=false,armT=null;
+$('reset').addEventListener('click',function(){
+  var b=this;
+  if(!armed){armed=true;b.textContent='Bấm lại để xác nhận xóa';clearTimeout(armT);armT=setTimeout(function(){armed=false;b.textContent='Đặt lại tiến độ';},3500);return;}
+  prog={};save();armed=false;b.textContent='Đặt lại tiến độ';renderHome();
+});
+var tbtn=$('theme');
+var SUN='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+var MOON='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/></svg>';
+function curTheme(){var a=document.documentElement.getAttribute('data-theme');if(a)return a;
+  return window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+function syncIcon(){tbtn.innerHTML=curTheme()==='dark'?SUN:MOON;}
+try{var sv=localStorage.getItem('gtbn_theme');if(sv)document.documentElement.setAttribute('data-theme',sv);}catch(e){}
+syncIcon();
+tbtn.addEventListener('click',function(){var n=curTheme()==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('gtbn_theme',n);}catch(e){}syncIcon();});
+
+if(ttsOk())speechSynthesis.getVoices();
+renderHome();
+})();
+</script>
+
+</body>
+</html>
