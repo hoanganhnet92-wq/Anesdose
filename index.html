@@ -999,6 +999,10 @@ function raCardHTML(){
       <div class="evsearch" style="margin-bottom:8px"><input id="raQ" type="search" placeholder="Tìm block: vai, gối, háng, sườn, TAP…" autocomplete="off" value="${RA_Q.replace(/"/g,"&quot;")}"></div>
       <div class="ctxrow">${regs.map(([k,l]) => `<button type="button" data-rareg="${k}" class="${RA_REG===k?"on":""}">${l}</button>`).join("")}</div>
     </div>
+    <div style="padding:0 14px 10px">
+      <div class="note" style="border:none;background:none;padding:0 0 6px;font-size:12.5px">📄 Xem tài liệu kỹ thuật (đầy đủ hình) ngay trong app — chạm để mở, không cần tải:</div>
+      <div class="ctxrow">${["tren","duoi","than"].map(r => `<button type="button" data-rapreview="${RA_PDF[r].id}" data-rapt="${RA_PDF[r].label}">👁 ${RA_PDF[r].label.replace(/\.pdf$/i,"")}</button>`).join("")}</div>
+    </div>
     <details class="rablk"${Object.keys(RA_HAVE).length < 3 ? " open" : ""}><summary><span class="ranm">📥 Tài liệu trên máy (để xem cả hình)</span>
       <span class="raen">${Object.keys(RA_HAVE).length}/3 file đã nạp · lưu riêng trên điện thoại này, không tải lên đâu</span></summary>
       ${raDocsHTML()}
