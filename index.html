@@ -351,7 +351,7 @@ button.pcitem{width:100%;background:none;border:0;border-top:1px solid var(--lin
 .pcview[hidden]{display:none}
 .pcview-bar{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--card)}
 .pcview-title{flex:1;font-weight:650;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pcview-open{font-size:13px;color:var(--accent);text-decoration:none;white-space:nowrap}
+.pcview-open,.pcview-dl{font-size:13px;color:var(--accent);text-decoration:none;white-space:nowrap}
 .pcview-close{min-width:var(--tap);min-height:var(--tap);border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:16px;cursor:pointer}
 .pcview-frame{flex:1;border:0;width:100%;background:#fff}
 /* Tìm phác đồ */
@@ -1006,7 +1006,7 @@ function raCardHTML(){
     <details class="rablk"${Object.keys(RA_HAVE).length < 3 ? " open" : ""}><summary><span class="ranm">📥 Tài liệu trên máy (để xem cả hình)</span>
       <span class="raen">${Object.keys(RA_HAVE).length}/3 file đã nạp · lưu riêng trên điện thoại này, không tải lên đâu</span></summary>
       ${raDocsHTML()}
-      <div class="note" style="border-top:none">Cách nạp: mở 3 file trong Google Drive → ⋮ → <b>Tải xuống</b>, rồi bấm <b>Chọn nhiều</b> ở đây và chọn cả 3 file trong thư mục Tải xuống. Chỉ cần làm một lần cho mỗi máy; sau đó xem được cả khi mất mạng.</div></details>
+      <div class="note" style="border-top:none">Cách nạp: bấm <b>⬇ Tải</b> ở từng dòng để tải file về máy (hoặc mở trong Drive rồi tải), sau đó bấm <b>Chọn</b> (hoặc <b>Chọn nhiều</b>) để nạp vào app. Chỉ cần làm một lần cho mỗi máy; sau đó xem được cả khi mất mạng.</div></details>
     <div class="note" style="border-top:none;background:var(--card);padding-top:4px">Đang tính cho <b>${d.n} ${c} %</b>, ${sig(w)} kg — liều tối đa <b>${sig(maxMg)} mg</b> = <b>${sig(maxMg/(c*10))} mL</b>. Đổi thuốc/nồng độ ở bảng "Thể tích gợi ý" bên dưới.</div>`;
   if(!list.length) h += `<div class="note">Không có block phù hợp.</div>`;
   for(const b of list){
@@ -3871,7 +3871,8 @@ function ensurePcView(){
     pv = document.createElement("div");
     pv.id = "pcView"; pv.className = "pcview"; pv.hidden = true;
     pv.innerHTML = `<div class="pcview-bar"><span class="pcview-title"></span>`
-      + `<a class="pcview-open" href="#" target="_blank" rel="noopener">Mở trong Drive ↗</a>`
+      + `<a class="pcview-dl" href="#" target="_blank" rel="noopener">⬇ Tải</a>`
+      + `<a class="pcview-open" href="#" target="_blank" rel="noopener">Mở Drive ↗</a>`
       + `<button type="button" class="pcview-close" aria-label="Đóng">✕</button></div>`
       + `<iframe class="pcview-frame" src="about:blank" allow="autoplay; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>`;
     document.body.appendChild(pv);
@@ -3883,6 +3884,7 @@ function openPcView(id, title){
   const pv = ensurePcView();
   pv.querySelector(".pcview-title").textContent = title || "Tài liệu";
   pv.querySelector(".pcview-open").href = "https://drive.google.com/file/d/" + id + "/view";
+  pv.querySelector(".pcview-dl").href = "https://drive.google.com/uc?export=download&id=" + id;
   pv.querySelector(".pcview-frame").src = "https://drive.google.com/file/d/" + id + "/preview";
   pv.hidden = false;
   document.body.style.overflow = "hidden";
@@ -4168,6 +4170,7 @@ function raDocsHTML(){
     const h = RA_HAVE[r];
     return `<div class="radoc"><span class="st">${h ? `<span class="ok">✓</span> <b>${p.label}</b> <span class="no">· ${mb(h.size)} trên máy</span>`
                                                    : `<span class="no">○</span> <b>${p.label}</b> <span class="no">· chưa nạp</span>`}</span>
+      <a class="radl" href="https://drive.google.com/uc?export=download&id=${p.id}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;align-self:center">⬇ Tải</a>
       <label>${h ? "Thay" : "Chọn"}<input type="file" accept="application/pdf,.pdf" data-raimp="${r}"></label>
       ${h ? `<button type="button" data-radel="${r}">Xoá</button>` : ""}</div>`;
   }).join("")}
